@@ -1,0 +1,15 @@
+.DS_Store
+Thumbs.db
+desktop.ini
+.vscode/
+.idea/
+*.swp
+*.log
+dist/
+build/
+.vercel/
+.env
+.env.local
+*.zip
+scraps/
+uploads/

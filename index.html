@@ -1,0 +1,1848 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VPC SafeNet — Международный гигабайтный интернет нового поколения</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#02040a;
+  --s1:#060d1a;
+  --s2:#0a1628;
+  --card:#0d1f38;
+  --cyan:#00d4ff;
+  --blue:#0066ff;
+  --neon:#00ffcc;
+  --violet:#7c3aed;
+  --green:#00ff88;
+  --gold:#ffd700;
+  --white:#f0f4ff;
+  --muted:#4a6080;
+  --border:rgba(0,212,255,0.12);
+  --border2:rgba(0,212,255,0.06);
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:"Outfit",sans-serif;background:var(--bg);color:var(--white);overflow-x:hidden;min-height:100vh;cursor:default}
+
+/* ══ STARFIELD BG ══ */
+.stars{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+.stars::before,.stars::after{
+  content:"";position:absolute;inset:0;
+  background-image:
+    radial-gradient(1px 1px at 20% 30%, rgba(0,212,255,0.6) 0%, transparent 100%),
+    radial-gradient(1px 1px at 80% 10%, rgba(255,255,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 50% 70%, rgba(0,255,204,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 10% 80%, rgba(0,102,255,0.5) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 60%, rgba(255,255,255,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 50%, rgba(0,212,255,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 90%, rgba(124,58,237,0.5) 0%, transparent 100%);
+  background-size:300px 300px;
+  animation:stars-drift 60s linear infinite;
+}
+.stars::after{background-size:200px 200px;animation-duration:40s;animation-direction:reverse;opacity:0.6}
+@keyframes stars-drift{to{transform:translate(300px,300px)}}
+
+/* Ambient glows */
+.glow-1{position:fixed;width:800px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,102,255,0.08) 0%,transparent 70%);top:-200px;left:-200px;pointer-events:none;z-index:0;animation:glow-pulse 8s ease-in-out infinite}
+.glow-2{position:fixed;width:600px;height:600px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,212,255,0.06) 0%,transparent 70%);bottom:-100px;right:-100px;pointer-events:none;z-index:0;animation:glow-pulse 12s ease-in-out infinite reverse}
+.glow-3{position:fixed;width:400px;height:400px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,255,204,0.05) 0%,transparent 70%);top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;z-index:0;animation:glow-pulse 6s ease-in-out infinite}
+@keyframes glow-pulse{0%,100%{opacity:0.5;transform:scale(1)}50%{opacity:1;transform:scale(1.1)}}
+.glow-3{animation:glow3-anim 6s ease-in-out infinite}
+@keyframes glow3-anim{0%,100%{opacity:0.5}50%{opacity:1}}
+
+/* Scanline */
+body::after{content:"";position:fixed;inset:0;z-index:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.03) 2px,rgba(0,0,0,0.03) 4px);pointer-events:none}
+
+/* ══ NAV ══ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 48px;height:72px;
+  background:rgba(2,4,10,0.85);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+}
+.logo-block{display:flex;align-items:center;gap:14px;flex-shrink:0;text-decoration:none}
+.logo-img{width:44px;height:44px;border-radius:50%;border:2px solid rgba(0,212,255,0.5);box-shadow:0 0 20px rgba(0,212,255,0.3),0 0 40px rgba(0,212,255,0.1);flex-shrink:0}
+.logo-name{font-size:19px;font-weight:700;letter-spacing:-0.3px;color:var(--white);white-space:nowrap}
+.logo-name em{font-style:normal;color:var(--cyan)}
+.nav-links{display:flex;gap:36px;font-size:14px}
+.nav-links a{text-decoration:none;color:var(--muted);transition:color .2s;letter-spacing:.3px}
+.nav-links a:hover{color:var(--white)}
+.nav-right{display:flex;align-items:center;gap:16px}
+.live-badge{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--neon);font-family:"JetBrains Mono",monospace;letter-spacing:.5px}
+.live-badge::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--neon);box-shadow:0 0 10px var(--neon);animation:lb 1.5s ease-in-out infinite}
+@keyframes lb{0%,100%{opacity:1}50%{opacity:.3}}
+.btn-nav{
+  padding:9px 22px;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  border:none;border-radius:8px;color:#fff;
+  font-size:13px;font-weight:700;cursor:pointer;
+  text-decoration:none;letter-spacing:.3px;
+  box-shadow:0 4px 20px rgba(0,212,255,0.3),0 0 0 1px rgba(0,212,255,0.2);
+  transition:transform .2s,box-shadow .2s;font-family:"Outfit",sans-serif;
+}
+.btn-nav:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(0,212,255,0.5),0 0 0 1px rgba(0,212,255,0.4)}
+@media(max-width:900px){nav{padding:0 20px}.nav-links{display:none}.logo-name{font-size:16px}}
+
+/* ══ HERO ══ */
+.hero{
+  position:relative;z-index:1;
+  min-height:100vh;display:flex;align-items:center;
+  padding:100px 0 80px;
+}
+.hero-inner{
+  max-width:1280px;margin:0 auto;width:100%;padding:0 48px;
+  display:grid;grid-template-columns:1fr 480px;gap:60px;align-items:center;
+}
+@media(max-width:1000px){.hero-inner{grid-template-columns:1fr;gap:48px;text-align:center;padding:0 24px}.globe-wrap{margin:0 auto}}
+
+.h-eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;font-weight:600;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--cyan);font-family:"JetBrains Mono",monospace;
+  background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.2);
+  padding:7px 16px;border-radius:20px;margin-bottom:28px;
+}
+.h-eyebrow::before{content:"//  "}
+
+h1{
+  font-size:clamp(32px,5vw,66px);font-weight:900;
+  line-height:1.02;letter-spacing:-2px;margin-bottom:8px;
+  background:linear-gradient(135deg,#ffffff 0%,rgba(0,212,255,0.9) 50%,#0066ff 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.h1-sub{
+  font-size:clamp(18px,2.5vw,24px);font-weight:300;
+  color:rgba(240,244,255,0.7);letter-spacing:-0.5px;margin-bottom:28px;line-height:1.4;
+}
+
+.hero-desc{
+  font-size:16px;line-height:1.75;color:var(--muted);
+  max-width:520px;margin-bottom:40px;font-weight:300;
+}
+@media(max-width:1000px){.hero-desc{margin:0 auto 40px}}
+
+/* CTA BUTTONS — объёмные */
+.cta-group{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:48px}
+@media(max-width:1000px){.cta-group{justify-content:center}}
+
+.btn-main{
+  position:relative;padding:16px 36px;
+  background:linear-gradient(135deg,#00d4ff 0%,#0066ff 100%);
+  border:none;border-radius:12px;color:#fff;
+  font-size:16px;font-weight:800;cursor:pointer;
+  text-decoration:none;display:inline-flex;align-items:center;gap:10px;
+  box-shadow:
+    0 6px 0 rgba(0,60,150,0.8),
+    0 8px 24px rgba(0,212,255,0.4),
+    inset 0 1px 0 rgba(255,255,255,0.3);
+  transition:transform .15s,box-shadow .15s;
+  font-family:"Outfit",sans-serif;letter-spacing:.3px;
+}
+.btn-main:hover{transform:translateY(-2px);box-shadow:0 8px 0 rgba(0,60,150,0.8),0 16px 40px rgba(0,212,255,0.5),inset 0 1px 0 rgba(255,255,255,0.3)}
+.btn-main:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,60,150,0.8),0 4px 12px rgba(0,212,255,0.3),inset 0 1px 0 rgba(255,255,255,0.3)}
+
+.btn-free{
+  position:relative;padding:16px 36px;
+  background:linear-gradient(135deg,rgba(0,255,136,0.15),rgba(0,255,204,0.1));
+  border:2px solid rgba(0,255,136,0.5);
+  border-radius:12px;color:var(--green);
+  font-size:16px;font-weight:700;cursor:pointer;
+  text-decoration:none;display:inline-flex;align-items:center;gap:10px;
+  box-shadow:
+    0 6px 0 rgba(0,80,40,0.7),
+    0 8px 24px rgba(0,255,136,0.2),
+    inset 0 1px 0 rgba(255,255,255,0.1);
+  transition:transform .15s,box-shadow .15s;
+  font-family:"Outfit",sans-serif;letter-spacing:.3px;
+}
+.btn-free:hover{transform:translateY(-2px);box-shadow:0 8px 0 rgba(0,80,40,0.7),0 16px 32px rgba(0,255,136,0.35),inset 0 1px 0 rgba(255,255,255,0.1);border-color:var(--green)}
+.btn-free:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,80,40,0.7),0 4px 8px rgba(0,255,136,0.2),inset 0 1px 0 rgba(255,255,255,0.1)}
+
+/* Trust chips */
+.trust-chips{display:flex;flex-wrap:wrap;gap:10px}
+@media(max-width:1000px){.trust-chips{justify-content:center}}
+.tchip{
+  display:flex;align-items:center;gap:6px;
+  padding:6px 13px;border-radius:20px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.07);
+  font-size:12px;color:var(--muted);letter-spacing:.3px;
+}
+.tchip-dot{width:5px;height:5px;border-radius:50%}
+.tc{background:var(--cyan)}.tg{background:var(--green)}.tv{background:var(--violet)}.tb{background:var(--blue)}.to{background:var(--gold)}
+
+/* ══ 3D GLOBE ══ */
+.globe-wrap{
+  position:relative;width:480px;height:480px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+}
+@media(max-width:500px){.globe-wrap{width:320px;height:320px}}
+
+/* Data corner tags */
+.dtag{
+  position:absolute;z-index:10;
+  background:rgba(6,13,26,0.9);
+  border:1px solid rgba(0,212,255,0.2);
+  border-radius:8px;padding:7px 12px;
+  font-size:11px;font-family:"JetBrains Mono",monospace;
+  white-space:nowrap;backdrop-filter:blur(10px);
+  animation:dtag-pulse 3s ease-in-out infinite;
+}
+@keyframes dtag-pulse{0%,100%{opacity:.8}50%{opacity:1}}
+.dt1{top:8%;left:0;color:var(--green);animation-delay:0s}
+.dt2{top:8%;right:0;color:var(--cyan);animation-delay:.8s}
+.dt3{bottom:12%;left:0;color:var(--violet);animation-delay:1.5s}
+.dt4{bottom:12%;right:0;color:var(--gold);animation-delay:2.2s}
+
+/* Orbit rings */
+.orbit{
+  position:absolute;border-radius:50%;
+  top:50%;left:50%;transform:translate(-50%,-50%);
+  border-style:solid;border-color:transparent;
+}
+.o1{
+  width:140px;height:140px;
+  border-top-color:rgba(0,212,255,0.25);
+  border-right-color:rgba(0,212,255,0.1);
+  animation:orb-spin 7s linear infinite;
+}
+.o2{
+  width:230px;height:230px;
+  border-top-color:rgba(0,102,255,0.2);
+  border-bottom-color:rgba(0,102,255,0.1);
+  animation:orb-spin 12s linear infinite reverse;
+}
+.o3{
+  width:330px;height:330px;
+  border-right-color:rgba(0,255,204,0.15);
+  border-left-color:rgba(0,255,204,0.08);
+  animation:orb-spin 18s linear infinite;
+}
+.o4{
+  width:440px;height:440px;
+  border-top-color:rgba(124,58,237,0.1);
+  border-bottom-color:rgba(124,58,237,0.06);
+  animation:orb-spin 25s linear infinite reverse;
+}
+@keyframes orb-spin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+
+/* Orbit dots */
+.odot{
+  position:absolute;width:8px;height:8px;border-radius:50%;
+  box-shadow:0 0 8px currentColor;
+}
+
+/* Icon nodes — rounded square + SVG */
+.inode{
+  position:absolute;
+  width:44px;height:44px;border-radius:14px;
+  display:flex;align-items:center;justify-content:center;
+  z-index:30;backdrop-filter:blur(10px);
+  animation:iconBob 4s ease-in-out infinite;
+  cursor:default;
+}
+.inode svg{width:22px;height:22px;flex-shrink:0}
+.inode-label{
+  position:absolute;bottom:-18px;left:50%;transform:translateX(-50%);
+  font-size:9px;font-family:'JetBrains Mono',monospace;
+  color:rgba(255,255,255,0.4);white-space:nowrap;letter-spacing:.5px;
+}
+@keyframes iconBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.in-yt  {background:rgba(255,0,0,0.12);   border:1px solid rgba(255,60,60,0.3);   box-shadow:0 0 16px rgba(255,0,0,0.15)}
+.in-tg  {background:rgba(0,136,204,0.12); border:1px solid rgba(0,180,255,0.3);   box-shadow:0 0 16px rgba(0,180,255,0.15)}
+.in-ai  {background:rgba(124,58,237,0.12);border:1px solid rgba(160,100,255,0.3); box-shadow:0 0 16px rgba(124,58,237,0.15)}
+.in-lock{background:rgba(0,255,136,0.12); border:1px solid rgba(0,255,136,0.3);   box-shadow:0 0 16px rgba(0,255,136,0.15)}
+
+/* SVG Globe */
+.globe-svg{
+  width:280px;height:280px;position:relative;z-index:3;
+  filter:drop-shadow(0 0 30px rgba(0,212,255,0.25));
+}
+@media(max-width:500px){.globe-svg{width:200px;height:200px}}
+
+/* LOGO CENTER */
+.logo-center{
+  position:absolute;z-index:10;
+  width:80px;height:80px;border-radius:50%;
+  overflow:hidden;
+  border:2px solid rgba(0,212,255,0.6);
+  box-shadow:
+    0 0 20px rgba(0,212,255,0.5),
+    0 0 40px rgba(0,212,255,0.2),
+    0 0 60px rgba(0,212,255,0.1),
+    inset 0 0 20px rgba(0,212,255,0.1);
+  animation:logo-glow 3s ease-in-out infinite;
+}
+@media(max-width:500px){.logo-center{width:56px;height:56px}}
+@keyframes logo-glow{
+  0%,100%{box-shadow:0 0 20px rgba(0,212,255,0.5),0 0 40px rgba(0,212,255,0.2),0 0 60px rgba(0,212,255,0.1),inset 0 0 20px rgba(0,212,255,0.1)}
+  50%{box-shadow:0 0 30px rgba(0,212,255,0.8),0 0 60px rgba(0,212,255,0.4),0 0 80px rgba(0,212,255,0.15),inset 0 0 30px rgba(0,212,255,0.2)}
+}
+.logo-center img{width:100%;height:100%;object-fit:cover}
+
+/* ══ STATS ══ */
+.stats-row{
+  position:relative;z-index:1;
+  max-width:1280px;margin:0 auto;padding:0 48px 80px;
+}
+.stats-grid{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  gap:24px;
+}
+@media(max-width:900px){.stats-grid{grid-template-columns:repeat(2,1fr);gap:16px}}
+@media(max-width:400px){.stats-grid{grid-template-columns:1fr}}
+
+/* ── Неоновая карточка ── */
+.stat{
+  position:relative;
+  border-radius:22px;
+  padding:40px 20px 36px;
+  text-align:center;
+  cursor:default;
+  overflow:hidden;
+  transition:transform .3s ease, box-shadow .3s ease;
+  background:radial-gradient(ellipse 120% 80% at 50% 0%, rgba(255,255,255,0.04) 0%, transparent 60%),
+             linear-gradient(170deg,#0b1530 0%,#060d1c 50%,#030810 100%);
+}
+.stat:hover{ transform:translateY(-6px) scale(1.02); }
+
+/* Неоновая рамка — псевдоэлемент для точного контроля */
+.stat::before{
+  content:"";
+  position:absolute;inset:0;
+  border-radius:22px;
+  padding:2px;
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+  mask-composite:exclude;
+  pointer-events:none;
+}
+/* Нижнее неоновое свечение на полу */
+.stat::after{
+  content:"";
+  position:absolute;bottom:-10px;left:15%;right:15%;
+  height:20px;border-radius:50%;
+  filter:blur(12px);
+  opacity:.7;
+  transition:opacity .3s, left .3s, right .3s;
+}
+.stat:hover::after{ left:10%;right:10%;opacity:1; }
+
+/* Иконка */
+.stat-icon{
+  font-size:32px;margin-bottom:16px;
+  display:block;
+  line-height:1;
+}
+
+/* Число */
+.stat-n{
+  font-size:clamp(36px,4vw,52px);font-weight:900;letter-spacing:-2px;
+  line-height:1;margin-bottom:12px;
+  display:block;
+}
+
+/* Подпись */
+.stat-l{
+  font-size:11px;letter-spacing:2px;text-transform:uppercase;
+  color:rgba(160,180,210,0.6);font-family:"JetBrains Mono",monospace;
+}
+
+/* ── КАРТОЧКА 1: СИНЯЯ (скорость) ── */
+.stat-blue{
+  border:2px solid rgba(0,140,255,0.5);
+  box-shadow:
+    inset 0 0 30px rgba(0,140,255,0.06),
+    0 0 30px rgba(0,140,255,0.15),
+    0 20px 60px rgba(0,0,0,0.6);
+}
+.stat-blue::before{ background:linear-gradient(135deg,rgba(0,140,255,0.7),rgba(0,80,200,0.3),transparent,rgba(0,140,255,0.2)); }
+.stat-blue::after{ background:rgba(0,140,255,0.6); }
+.stat-blue:hover{ box-shadow:inset 0 0 40px rgba(0,140,255,0.1),0 0 50px rgba(0,140,255,0.3),0 24px 80px rgba(0,0,0,0.7); }
+.stat-blue .stat-n{
+  color:#4db8ff;
+  text-shadow:0 0 20px rgba(0,140,255,0.8),0 0 40px rgba(0,140,255,0.4);
+}
+.stat-blue .stat-icon{ filter:drop-shadow(0 0 10px rgba(255,180,0,0.8)); }
+
+/* ── КАРТОЧКА 2: ПУРПУРНАЯ (трафик) ── */
+.stat-purple{
+  border:2px solid rgba(180,0,255,0.5);
+  box-shadow:
+    inset 0 0 30px rgba(180,0,255,0.06),
+    0 0 30px rgba(180,0,255,0.15),
+    0 20px 60px rgba(0,0,0,0.6);
+}
+.stat-purple::before{ background:linear-gradient(135deg,rgba(180,0,255,0.7),rgba(120,0,200,0.3),transparent,rgba(255,0,200,0.2)); }
+.stat-purple::after{ background:linear-gradient(90deg,rgba(180,0,255,0.5),rgba(255,0,180,0.5)); }
+.stat-purple:hover{ box-shadow:inset 0 0 40px rgba(180,0,255,0.1),0 0 50px rgba(180,0,255,0.3),0 24px 80px rgba(0,0,0,0.7); }
+.stat-purple .stat-n{
+  background:linear-gradient(135deg,#cc44ff,#ff44cc);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 16px rgba(180,0,255,0.6));
+}
+.stat-purple .stat-icon{ filter:drop-shadow(0 0 12px rgba(255,100,0,0.7)); }
+
+/* ── КАРТОЧКА 3: ЦИАНОВАЯ (аптайм) ── */
+.stat-teal{
+  border:2px solid rgba(0,220,180,0.45);
+  box-shadow:
+    inset 0 0 30px rgba(0,220,180,0.05),
+    0 0 30px rgba(0,220,180,0.12),
+    0 20px 60px rgba(0,0,0,0.6);
+}
+.stat-teal::before{ background:linear-gradient(135deg,rgba(0,220,180,0.6),rgba(0,160,140,0.3),transparent,rgba(0,220,180,0.15)); }
+.stat-teal::after{ background:rgba(0,220,180,0.5); }
+.stat-teal:hover{ box-shadow:inset 0 0 40px rgba(0,220,180,0.08),0 0 50px rgba(0,220,180,0.25),0 24px 80px rgba(0,0,0,0.7); }
+.stat-teal .stat-n{
+  color:#00ddb4;
+  text-shadow:0 0 20px rgba(0,220,180,0.8),0 0 40px rgba(0,220,180,0.4);
+}
+.stat-teal .stat-icon{
+  color:rgba(0,220,180,0.5);
+  filter:drop-shadow(0 0 8px rgba(0,220,180,0.4));
+  font-size:28px;
+}
+
+/* ── КАРТОЧКА 4: ИНДИГО (поддержка) ── */
+.stat-indigo{
+  border:2px solid rgba(80,80,255,0.45);
+  box-shadow:
+    inset 0 0 30px rgba(80,80,255,0.05),
+    0 0 30px rgba(80,80,255,0.12),
+    0 20px 60px rgba(0,0,0,0.6);
+}
+.stat-indigo::before{ background:linear-gradient(135deg,rgba(80,80,255,0.6),rgba(60,60,200,0.3),transparent,rgba(100,80,255,0.15)); }
+.stat-indigo::after{ background:rgba(80,80,255,0.5); }
+.stat-indigo:hover{ box-shadow:inset 0 0 40px rgba(80,80,255,0.08),0 0 50px rgba(80,80,255,0.25),0 24px 80px rgba(0,0,0,0.7); }
+.stat-indigo .stat-n{
+  color:#8080ff;
+  text-shadow:0 0 20px rgba(80,80,255,0.8),0 0 40px rgba(80,80,255,0.4);
+}
+.stat-indigo .stat-icon{ filter:drop-shadow(0 0 10px rgba(80,80,255,0.6)); }
+
+/* ══ SECTION BASE ══ */
+.section{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 48px 100px}
+@media(max-width:700px){.section{padding:0 24px 60px}.stats-row{padding:0 24px 60px}}
+.s-eye{font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);font-family:"JetBrains Mono",monospace;margin-bottom:14px}
+.s-title{font-size:clamp(28px,4vw,46px);font-weight:900;letter-spacing:-1.5px;line-height:1.08;margin-bottom:16px}
+.s-sub{font-size:16px;color:var(--muted);line-height:1.7;max-width:580px}
+
+/* ══ FEATURES ══ */
+.feat-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:1px;background:var(--border);
+  border-radius:20px;overflow:hidden;margin-top:48px;
+}
+@media(max-width:900px){.feat-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:500px){.feat-grid{grid-template-columns:1fr}}
+.fc{
+  background:var(--s1);padding:36px 28px;
+  position:relative;overflow:hidden;transition:background .3s;
+}
+.fc:hover{background:var(--s2)}
+.fc::before{
+  content:"";position:absolute;top:0;left:0;right:0;height:2px;
+  opacity:0;transition:opacity .3s;
+}
+.fc:nth-child(1)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.fc:nth-child(2)::before{background:linear-gradient(90deg,transparent,var(--blue),transparent)}
+.fc:nth-child(3)::before{background:linear-gradient(90deg,transparent,var(--violet),transparent)}
+.fc:nth-child(4)::before{background:linear-gradient(90deg,transparent,var(--green),transparent)}
+.fc:nth-child(5)::before{background:linear-gradient(90deg,transparent,var(--gold),transparent)}
+.fc:nth-child(6)::before{background:linear-gradient(90deg,transparent,var(--cyan),transparent)}
+.fc:hover::before{opacity:1}
+.fi{width:48px;height:48px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:20px}
+.fi-c{background:rgba(0,212,255,0.1)} .fi-b{background:rgba(0,102,255,0.1)} .fi-v{background:rgba(124,58,237,0.1)} .fi-g{background:rgba(0,255,136,0.1)} .fi-o{background:rgba(255,215,0,0.1)}
+.ft{font-size:17px;font-weight:700;margin-bottom:10px;letter-spacing:-.3px}
+.fd{font-size:14px;line-height:1.7;color:var(--muted)}
+.badge{display:inline-block;font-size:10px;padding:2px 8px;border-radius:4px;font-family:"JetBrains Mono",monospace;font-weight:600;letter-spacing:.5px;margin-bottom:8px}
+.bc{background:rgba(0,212,255,0.12);color:var(--cyan)}
+.bv{background:rgba(124,58,237,0.12);color:#a78bfa}
+.bg{background:rgba(0,255,136,0.12);color:var(--green)}
+
+/* ══ EMOTION BLOCK ══ */
+.emotion-block{
+  position:relative;z-index:1;
+  max-width:1280px;margin:0 auto;padding:0 48px 100px;
+}
+.emotion-card{
+  background:linear-gradient(135deg,rgba(0,102,255,0.08),rgba(0,212,255,0.06),rgba(124,58,237,0.08));
+  border:1px solid rgba(0,212,255,0.15);border-radius:24px;
+  padding:72px 64px;text-align:center;
+  position:relative;overflow:hidden;
+}
+@media(max-width:700px){.emotion-card{padding:48px 24px}}
+.emotion-card::before{
+  content:"";position:absolute;top:-1px;left:15%;right:15%;height:2px;
+  background:linear-gradient(90deg,transparent,var(--cyan),var(--blue),var(--violet),transparent);
+}
+.emotion-card::after{
+  content:"";position:absolute;
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(0,212,255,0.05) 0%,transparent 60%);
+  top:50%;left:50%;transform:translate(-50%,-50%);pointer-events:none;
+}
+.emo-wave{font-size:13px;letter-spacing:3px;text-transform:uppercase;color:var(--cyan);font-family:"JetBrains Mono",monospace;margin-bottom:24px}
+.emo-title{font-size:clamp(32px,5vw,56px);font-weight:900;letter-spacing:-2px;line-height:1.05;margin-bottom:32px}
+.emo-title em{font-style:normal;background:linear-gradient(135deg,var(--cyan),var(--neon));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.emo-text{font-size:18px;line-height:1.8;color:var(--muted);max-width:640px;margin:0 auto 40px}
+.emo-text strong{color:var(--white);font-weight:600}
+@media(max-width:700px){.emotion-block{padding:0 24px 60px}}
+
+/* ══ CLUB ONBOARDING ══ */
+.club-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start;margin-top:48px;
+}
+@media(max-width:800px){.club-grid{grid-template-columns:1fr}}
+.club-steps{display:flex;flex-direction:column;gap:20px}
+.step{
+  display:flex;align-items:flex-start;gap:16px;
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:14px;padding:20px 20px;
+  transition:border-color .3s,background .3s;
+}
+.step:hover{border-color:rgba(0,212,255,0.3);background:var(--s2)}
+.step-num{
+  width:36px;height:36px;border-radius:8px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  display:flex;align-items:center;justify-content:center;
+  font-size:14px;font-weight:800;color:#fff;
+  box-shadow:0 4px 12px rgba(0,212,255,0.3);
+}
+.step-content .st{font-size:15px;font-weight:700;margin-bottom:4px}
+.step-content .sd{font-size:13px;color:var(--muted);line-height:1.5}
+.club-visual{
+  background:linear-gradient(160deg,rgba(20,0,50,0.7) 0%,rgba(0,20,60,0.6) 50%,rgba(0,10,30,0.8) 100%);
+  border:1px solid rgba(176,96,255,0.22);
+  border-radius:20px;
+  padding:36px 32px;
+  box-shadow:0 0 40px rgba(176,96,255,0.08),0 20px 60px rgba(0,0,0,0.4);
+  position:relative;
+  overflow:hidden;
+}
+.club-visual::before{
+  content:"";
+  position:absolute;top:-1px;left:10%;right:10%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(176,96,255,0.5),rgba(0,212,255,0.4),transparent);
+}
+.cv-title{font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);font-family:"JetBrains Mono",monospace;margin-bottom:24px}
+.cv-item{
+  display:flex;align-items:center;gap:14px;
+  padding:14px 0;border-bottom:1px solid var(--border2);
+  font-size:14px;
+}
+.cv-item:last-child{border-bottom:none}
+.cv-ic{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+
+/* ══ PRICING ══ */
+.price-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;
+}
+@media(max-width:900px){.price-grid{grid-template-columns:1fr}}
+.pc{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:20px;padding:36px 28px;
+  position:relative;transition:transform .3s,border-color .3s;
+}
+.pc:hover{transform:translateY(-4px)}
+.pc.hot{
+  border-color:rgba(0,212,255,0.4);
+  background:linear-gradient(135deg,rgba(0,212,255,0.07),rgba(0,102,255,0.07));
+}
+.pc.hot::before{
+  content:"ЛУЧШИЙ ВЫБОР";
+  position:absolute;top:-14px;left:50%;transform:translateX(-50%);
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  padding:5px 18px;border-radius:20px;
+  font-size:10px;font-weight:800;letter-spacing:1.5px;color:#fff;
+  white-space:nowrap;box-shadow:0 4px 16px rgba(0,212,255,0.4);
+}
+.p-name{font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:20px}
+.p-price{font-size:48px;font-weight:900;letter-spacing:-2px;line-height:1}
+.p-price sup{font-size:22px;letter-spacing:0;vertical-align:top;margin-top:10px;display:inline-block;color:var(--muted)}
+.p-period{font-size:13px;color:var(--muted);margin-top:6px;margin-bottom:8px}
+.p-note{font-size:12px;color:var(--green);margin-bottom:24px;display:flex;align-items:center;gap:6px}
+.p-features{list-style:none;margin-bottom:28px}
+.p-features li{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--muted);padding:8px 0;border-bottom:1px solid var(--border2)}
+.p-features li:last-child{border-bottom:none}
+.p-features li::before{content:"✓";color:var(--green);font-weight:800;flex-shrink:0;margin-top:1px}
+.btn-price-main{
+  width:100%;padding:14px;border-radius:12px;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  border:none;color:#fff;font-size:15px;font-weight:800;
+  cursor:pointer;font-family:"Outfit",sans-serif;letter-spacing:.3px;
+  box-shadow:0 4px 0 rgba(0,60,150,0.7),0 6px 20px rgba(0,212,255,0.35),inset 0 1px 0 rgba(255,255,255,0.2);
+  transition:transform .15s,box-shadow .15s;
+}
+.btn-price-main:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(0,60,150,0.7),0 12px 32px rgba(0,212,255,0.5),inset 0 1px 0 rgba(255,255,255,0.2)}
+.btn-price-main:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,60,150,0.7),0 4px 10px rgba(0,212,255,0.25),inset 0 1px 0 rgba(255,255,255,0.2)}
+.btn-price-out{
+  width:100%;padding:14px;border-radius:12px;
+  background:transparent;
+  border:2px solid rgba(0,212,255,0.3);
+  color:var(--white);font-size:15px;font-weight:700;
+  cursor:pointer;font-family:"Outfit",sans-serif;letter-spacing:.3px;
+  box-shadow:0 4px 0 rgba(0,30,80,0.5),inset 0 1px 0 rgba(255,255,255,0.05);
+  transition:transform .15s,box-shadow .15s,border-color .2s;
+}
+.btn-price-out:hover{border-color:var(--cyan);transform:translateY(-2px);box-shadow:0 6px 0 rgba(0,30,80,0.5),0 8px 24px rgba(0,212,255,0.2),inset 0 1px 0 rgba(255,255,255,0.05)}
+.btn-price-out:active{transform:translateY(2px);box-shadow:0 2px 0 rgba(0,30,80,0.5)}
+
+/* ══ FORM ══ */
+.form-wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 48px 100px}
+@media(max-width:700px){.form-wrap{padding:0 24px 60px}}
+.form-card{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:24px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 1fr;
+}
+@media(max-width:800px){.form-card{grid-template-columns:1fr}}
+.fl{
+  padding:56px 48px;
+  background:linear-gradient(135deg,rgba(0,102,255,0.08),rgba(0,212,255,0.05));
+  border-right:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+@media(max-width:700px){.fl,.fr{padding:36px 24px}}
+.fl::before{content:"";position:absolute;bottom:-80px;left:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(0,212,255,0.08),transparent 70%);pointer-events:none}
+.fl-eye{font-size:11px;letter-spacing:2.5px;text-transform:uppercase;color:var(--cyan);font-family:"JetBrains Mono",monospace;margin-bottom:20px}
+.fl-title{font-size:30px;font-weight:900;letter-spacing:-1px;margin-bottom:14px;line-height:1.15}
+.fl-desc{font-size:14px;line-height:1.75;color:var(--muted);margin-bottom:32px}
+.blist{list-style:none;display:flex;flex-direction:column;gap:14px}
+.blist li{display:flex;align-items:center;gap:12px;font-size:14px}
+.bic{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.fr{padding:56px 48px}
+.pill{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);
+  color:var(--green);font-size:12px;font-weight:700;letter-spacing:.5px;
+  padding:7px 16px;border-radius:20px;margin-bottom:28px;
+}
+.field{margin-bottom:18px}
+.field label{display:block;font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;font-weight:600}
+.field input{
+  width:100%;background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.08);
+  border-radius:10px;padding:14px 16px;
+  color:var(--white);font-size:15px;font-family:"Outfit",sans-serif;
+  outline:none;transition:border-color .25s,box-shadow .25s;
+}
+.field input::placeholder{color:rgba(255,255,255,0.18)}
+.field input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,212,255,0.1)}
+.btn-submit{
+  width:100%;padding:16px;margin-top:8px;
+  background:linear-gradient(135deg,var(--cyan),var(--blue));
+  border:none;border-radius:12px;color:#fff;
+  font-size:16px;font-weight:800;cursor:pointer;
+  font-family:"Outfit",sans-serif;letter-spacing:.3px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  box-shadow:0 6px 0 rgba(0,60,150,0.7),0 8px 24px rgba(0,212,255,0.4),inset 0 1px 0 rgba(255,255,255,0.25);
+  transition:transform .15s,box-shadow .15s;
+}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:0 8px 0 rgba(0,60,150,0.7),0 16px 40px rgba(0,212,255,0.5),inset 0 1px 0 rgba(255,255,255,0.25)}
+.btn-submit:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,60,150,0.7),0 4px 12px rgba(0,212,255,0.3),inset 0 1px 0 rgba(255,255,255,0.25)}
+.btn-submit:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.fnote{font-size:11px;color:var(--muted);text-align:center;margin-top:14px;line-height:1.6}
+.errmsg{display:none;color:#f87171;font-size:13px;text-align:center;margin-top:12px;padding:10px;border-radius:8px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.12)}
+
+/* Success */
+.success-state{display:none;text-align:center;padding:20px 0}
+.success-state h3{font-size:28px;font-weight:900;color:var(--green);margin:20px 0 12px;letter-spacing:-1px}
+.success-state p{font-size:15px;color:var(--muted);line-height:1.7}
+.tg-btn{display:inline-flex;align-items:center;gap:10px;margin-top:24px;background:#229ED9;color:#fff;padding:14px 28px;border-radius:12px;text-decoration:none;font-size:15px;font-weight:700;box-shadow:0 4px 0 rgba(0,80,130,0.6),0 6px 20px rgba(34,158,217,0.3);transition:transform .15s,box-shadow .15s}
+.tg-btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 rgba(0,80,130,0.6),0 12px 32px rgba(34,158,217,0.5)}
+
+/* ══ INVESTEYA CLUB BLOCK ══ */
+.club-hero-wrap{
+  position:relative;z-index:1;
+  max-width:1280px;margin:0 auto;padding:0 48px 80px;
+}
+@media(max-width:700px){.club-hero-wrap{padding:0 24px 60px}}
+.club-hero-card{
+  border-radius:24px;overflow:hidden;
+  display:grid;grid-template-columns:1fr 420px;
+  background:linear-gradient(135deg,#060d1a 0%,#030a14 100%);
+  border:1px solid rgba(0,212,255,0.15);
+  position:relative;
+}
+@media(max-width:900px){.club-hero-card{grid-template-columns:1fr}}
+.club-hero-card::before{
+  content:"";position:absolute;top:-1px;left:10%;right:10%;height:2px;
+  background:linear-gradient(90deg,transparent,#b060ff,var(--cyan),#ff60b0,transparent);
+}
+.club-hero-content{padding:56px 52px;position:relative;z-index:2}
+@media(max-width:700px){.club-hero-content{padding:36px 24px}}
+.ch-eye{
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:#b060ff;font-family:"JetBrains Mono",monospace;margin-bottom:16px;
+}
+.ch-title{
+  font-size:clamp(28px,3.5vw,42px);font-weight:900;letter-spacing:-1.5px;
+  line-height:1.08;margin-bottom:16px;
+  background:linear-gradient(135deg,#00d4ff 0%,#4af0ff 40%,#0099cc 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.ch-title em{
+  font-style:normal;
+  background:linear-gradient(135deg,#00d4ff,#00ffcc);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.ch-desc{font-size:15px;line-height:1.75;color:var(--muted);margin-bottom:32px;max-width:440px}
+.ch-items{display:flex;flex-direction:column;gap:12px;margin-bottom:36px}
+.ch-item{
+  display:flex;align-items:center;gap:12px;
+  font-size:14px;
+}
+.ch-dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+  background:linear-gradient(135deg,#b060ff,var(--cyan));
+  box-shadow:0 0 8px rgba(176,96,255,0.6);
+}
+.club-hero-visual{
+  position:relative;overflow:hidden;min-height:380px;
+}
+@media(max-width:900px){.club-hero-visual{min-height:260px}}
+/* SVG gradient девушки — Инвестея */
+.investeya-img{
+  position:absolute;inset:0;width:100%;height:100%;
+  object-fit:cover;object-position:top center;
+  opacity:.85;
+}
+.club-hero-visual::before{
+  content:"";position:absolute;
+  left:0;top:0;bottom:0;width:80px;z-index:2;
+  background:linear-gradient(90deg,#060d1a,transparent);
+}
+.club-hero-visual::after{
+  content:"";position:absolute;
+  bottom:0;left:0;right:0;height:80px;z-index:2;
+  background:linear-gradient(0deg,#030a14,transparent);
+}
+.cv-badge{
+  position:absolute;bottom:20px;left:20px;z-index:10;
+  background:rgba(3,7,18,0.85);
+  border:1px solid rgba(176,96,255,0.3);
+  border-radius:10px;padding:10px 16px;
+  font-size:12px;font-family:"JetBrains Mono",monospace;
+  color:#b060ff;backdrop-filter:blur(10px);
+}
+
+/* ══ LEGAL BLOCK ══ */
+.legal-wrap{
+  position:relative;z-index:1;
+  max-width:1280px;margin:0 auto;padding:0 48px 80px;
+}
+@media(max-width:700px){.legal-wrap{padding:0 24px 60px}}
+
+/* New document-style legal card */
+.legal-doc{
+  background:linear-gradient(160deg,rgba(4,8,22,0.98),rgba(2,4,10,0.99));
+  border:1px solid rgba(0,212,255,0.1);
+  border-radius:20px;padding:56px 72px;
+  text-align:center;position:relative;overflow:hidden;
+}
+@media(max-width:700px){.legal-doc{padding:40px 24px}}
+.legal-doc::before{
+  content:"";position:absolute;top:-1px;left:15%;right:15%;height:1px;
+  background:linear-gradient(90deg,transparent,rgba(0,212,255,0.35),transparent);
+}
+.legal-doc-header{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:20px;margin-bottom:32px;
+}
+.legal-doc-headings{flex:1;text-align:center}
+.legal-doc-side{flex-shrink:0;width:88px;display:flex;flex-direction:column;align-items:center;gap:7px}
+.legal-doc-side span{font-size:10px;letter-spacing:2px;text-transform:uppercase;font-family:"JetBrains Mono",monospace;color:var(--muted)}
+@media(max-width:600px){.legal-doc-side{display:none}}
+.legal-doc-h1{
+  font-size:clamp(22px,3vw,30px);font-weight:900;
+  letter-spacing:4px;text-transform:uppercase;
+  color:var(--white);margin-bottom:10px;line-height:1.15;
+}
+.legal-doc-h2{
+  font-size:13px;color:var(--muted);line-height:1.6;
+  max-width:440px;margin:0 auto;
+}
+
+.legal-doc-body{
+  font-size:13.5px;line-height:1.9;color:rgba(160,180,210,0.75);
+  max-width:640px;margin:0 auto 36px;
+  font-family:"JetBrains Mono",monospace;
+}
+.legal-doc-main{
+  font-size:clamp(22px,3.5vw,34px);font-weight:900;
+  letter-spacing:-0.5px;line-height:1.25;
+  color:#ff3a3a;
+  text-shadow:0 0 40px rgba(255,50,50,0.25),0 0 80px rgba(255,50,50,0.1);
+  margin-bottom:36px;
+}
+.legal-doc-footer{
+  font-size:13.5px;line-height:1.9;color:rgba(160,180,210,0.75);
+  max-width:580px;margin:0 auto;
+  font-family:"JetBrains Mono",monospace;
+}
+
+/* Keep old classes for any edge cases */
+.legal-card{display:none}
+.legal-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:11px;letter-spacing:2.5px;text-transform:uppercase;
+  color:var(--cyan);font-family:"JetBrains Mono",monospace;
+  background:rgba(0,212,255,0.07);border:1px solid rgba(0,212,255,0.2);
+  padding:7px 14px;border-radius:20px;margin-bottom:20px;
+}
+.legal-title{font-size:26px;font-weight:900;letter-spacing:-1px;margin-bottom:16px;line-height:1.2}
+.legal-main-text{
+  font-size:22px;font-weight:800;letter-spacing:-0.5px;
+  background:linear-gradient(135deg,var(--cyan),var(--neon));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  line-height:1.3;margin-bottom:20px;
+}
+.legal-desc{font-size:14px;line-height:1.75;color:var(--muted)}
+.legal-shield{
+  display:flex;align-items:center;justify-content:center;
+  width:72px;height:72px;border-radius:50%;
+  background:linear-gradient(135deg,rgba(0,212,255,0.15),rgba(0,102,255,0.1));
+  border:1px solid rgba(0,212,255,0.3);
+  font-size:32px;margin-bottom:24px;
+  box-shadow:0 0 24px rgba(0,212,255,0.2);
+}
+.legal-points{display:flex;flex-direction:column;gap:14px}
+.lp{
+  display:flex;align-items:flex-start;gap:12px;
+  padding:14px 16px;border-radius:12px;
+  background:rgba(0,212,255,0.04);
+  border:1px solid rgba(0,212,255,0.08);
+  font-size:13px;line-height:1.6;
+}
+.lp-ic{font-size:18px;flex-shrink:0;margin-top:1px}
+.lp-text{color:var(--muted)}
+.lp-text strong{color:var(--white);display:block;font-size:13px;margin-bottom:3px}
+
+/* ══ TRUST BAR ══ */
+.trust-wrap{position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:0 48px 60px;display:flex;flex-wrap:wrap;justify-content:center;gap:28px}
+@media(max-width:700px){.trust-wrap{padding:0 24px 40px}}
+.titem{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted)}
+.tic{width:34px;height:34px;border-radius:8px;background:var(--s1);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px}
+
+/* ══ FOOTER ══ */
+footer{
+  position:relative;z-index:1;
+  border-top:1px solid var(--border);
+  max-width:1280px;margin:0 auto;
+  padding:36px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:16px;
+}
+@media(max-width:700px){footer{padding:24px;flex-direction:column;text-align:center}}
+.flogo{display:flex;align-items:center;gap:12px;font-size:17px;font-weight:700;text-decoration:none;color:var(--white)}
+.flogo img{width:34px;height:34px;border-radius:50%;border:1px solid rgba(0,212,255,0.4)}
+.flogo em{font-style:normal;color:var(--cyan)}
+.flegal{font-size:12px;color:var(--muted);line-height:1.6;text-align:center}
+.ftg a{color:var(--cyan);text-decoration:none;font-size:13px}
+
+/* ══ SCROLL REVEAL ══ */
+.sr{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.sr.in{opacity:1;transform:translateY(0)}
+.sr1{transition-delay:.1s}.sr2{transition-delay:.2s}.sr3{transition-delay:.3s}
+
+/* Spinner */
+.spin{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spinning .7s linear infinite}
+@keyframes spinning{to{transform:rotate(360deg)}}
+</style>
+<template id="__bundler_thumbnail" data-bg-color="#02040a">
+  <svg viewBox="0 0 400 260" xmlns="http://www.w3.org/2000/svg">
+    <!-- Globe -->
+    <circle cx="280" cy="130" r="80" fill="#071628" stroke="rgba(0,212,255,0.5)" stroke-width="2"/>
+    <ellipse cx="280" cy="130" rx="80" ry="18" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+    <ellipse cx="280" cy="130" rx="80" ry="45" fill="none" stroke="rgba(0,212,255,0.2)" stroke-width="1"/>
+    <circle cx="280" cy="130" r="26" fill="#0d3060" stroke="rgba(0,212,255,0.8)" stroke-width="2"/>
+    <path d="M280 112 L293 117 L293 127 Q293 138 280 143 Q267 138 267 127 L267 117 Z" fill="rgba(0,102,255,0.4)" stroke="rgba(0,212,255,0.8)" stroke-width="1"/>
+    <text x="280" y="128" font-family="monospace" font-size="7" fill="#00d4ff" text-anchor="middle">SafeNet</text>
+    <!-- Orbit rings -->
+    <ellipse cx="280" cy="130" rx="105" ry="22" fill="none" stroke="rgba(0,212,255,0.3)" stroke-width="1.2"/>
+    <ellipse cx="280" cy="130" rx="118" ry="50" fill="none" stroke="rgba(0,102,255,0.2)" stroke-width="1"/>
+    <!-- Text block -->
+    <rect x="24" y="60" width="200" height="6" rx="3" fill="rgba(0,212,255,0.5)"/>
+    <rect x="24" y="78" width="170" height="22" rx="4" fill="rgba(0,212,255,0.08)" stroke="rgba(0,212,255,0.3)" stroke-width="1"/>
+    <text x="34" y="93" font-family="monospace" font-size="8" fill="#00d4ff">VPC SafeNet</text>
+    <rect x="24" y="112" width="220" height="8" rx="3" fill="rgba(255,255,255,0.12)"/>
+    <rect x="24" y="128" width="190" height="8" rx="3" fill="rgba(255,255,255,0.08)"/>
+    <rect x="24" y="144" width="200" height="8" rx="3" fill="rgba(255,255,255,0.06)"/>
+    <!-- CTA button -->
+    <rect x="24" y="168" width="140" height="32" rx="10" fill="url(#btn-g)"/>
+    <defs>
+      <linearGradient id="btn-g" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#00d4ff"/>
+        <stop offset="100%" stop-color="#0066ff"/>
+      </linearGradient>
+    </defs>
+    <text x="94" y="189" font-family="monospace" font-size="9" fill="white" text-anchor="middle" font-weight="bold">Войти в клуб</text>
+  </svg>
+</template>
+
+<body style="background-color: rgb(34, 36, 40)">
+
+<!-- BG -->
+<div class="stars"></div>
+<div class="glow-1"></div>
+<div class="glow-2"></div>
+<div class="glow-3"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo-block">
+    <img class="logo-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABpAHEDASIAAhEBAxEB/8QAHQAAAQQDAQEAAAAAAAAAAAAAAAUGBwgDBAkBAv/EAD8QAAEDAwIEAwUGAgkFAQAAAAECAwQFBhEAIQcSMUETUXEIIjJhgRQVQlKRoSOxFjNDYmOCkqLBFzRywtHw/8QAGgEAAgMBAQAAAAAAAAAAAAAABAUAAwYCAf/EAC8RAAEDAwMCBAUEAwAAAAAAAAEAAgMEESEFEjFBcRMiUfAygZGhsRQVYeEjwdH/2gAMAwEAAhEDEQA/ALa6NGvppCnFco+p1FF4lKlKwkZOtpuMlI5nTn5dtId93hbth2+ur1+WGGQeVttI5nX19kIT+I/sO+BqkvGn2iLpvSS9TKU4umUonkTFjOEc4/xXEnKz/dThP/lq+GB0vHCrklazlW3vjjTw7tBTsaVWUTJjRwqLAT4yknyUoe6j/MRqHLi9r6Oham6FazSsdHJc0k/6G0Ef79V8tHhxXLlfZdrE5unx17oS58WOvutjp9cal2h8MOGlCkCPV5Dk+SnBUHpBSkfLkbTkde6tOI9La0XeEln1hrTtab9v+rG/7Wl6LVzNU2kNp/KITiv3Lo1u0v2vLiZcH3jbtJlI78hdjq/XLg/bUnU7h3wwQwlK7dpWSPd5kuEn9Vab90WBwiMlUGXREQ3Cnm54r60kDzwc/wAteimp3HaGH381QNWeBcn39Es2d7VNkVZaGqzT51HUrYuIIktp9eUBeP8AJqZ7crtvXTTxPoFVh1GOdvEjOhWD5EDcH5HfVKLw4J2/IUtyz7jyvOUx52Ek/ILSMZ9QNRu3LvzhhcaHkvVCmS0fC62spLic9lbpcT8jzDVM+lgC7MI6m1VkpsTldKnmFt7j3k+esWoJ4Ce0jTbsVHod4KjwKo4oNszEDkYfUdglYJPhrPqUnsR01P8AIYGOdseo0oex0Zs5NWuDhcLW0aNGuF0jRo0aii9SCpQSOp0nX5dVIsS0ZlwVh3lYjJ2Qk++84dktoHdRO376WoSOrh9Bqh/tn8UHbqvly3abJUaTRnFsN8h911/o64fPByhPorz1bDHvdbouHu2i6j/jBxJuHiVdb06Y8SkktMMNq9xhrOzaPl5q6qPywNe2dS2KZIbeJQ9J2UCNwg9sdvrpKsa1KpU1tPshphhzI8ZxwDAGx2GVH9NTZR+FfjRm10GqpmvoT/GafAb5j5oOSMfJWP8AgauggDGiRwx+FlNV1GNp8HdkpqJucwpxjQpbbtRUshATlSAo7YORy7dfUddbF1XK63QIkeoU5x+oNO4dkqb8NO4yBzJ+MEf863K7a6aRXkoqNKESeyjmHIEOFZWMJUooz6j00kXPcFPjc9PmR2pMVbPglzxUPKykKAKUjGDnHvZGMd9EyvxcnsgImte4Bje6Xp3FRpm3IDdILbctKAlxssYDWE74/Nk9Nz89ILd5Sp4fE5tU6YUqLchchYKABnHKNj3/AF1G4SQhopyQoHGTvjJH/Gl2lUaqS5AcYjuFrmALp91AyPzHbVDXk8Io0sUadlJq8/8AgVCU443TxIS288Dzcue/L16fy0+qlctuXKFUSXHRLguoC2khJ93qCQfwnbb100eGdKm1KsRqFJqjbsF9YjPsJdStCEqVzKJJISPhz8QJKRrLcE2LTKtJpCfsUVyO4ppSNklSQSBgpBGCAD8R6jRMZDjZxQM8ZJu0HuFHN/2s5a08T6TJ+1U104bcxunzbcHn+x66s77InHM1YRrHuiWVP48OmSnl77DZhZPU4B5FHcgYO4GYJjQ7gr7UuPBo8+pR/hd8BhTjZ+WQMZHUeWo6mMVG1bjKH2pkJ5pYPKpJadRg5SoZ3CgcEHzGlWpU0bstOPwtFptS+22TkfddVZTXKfESNj1+WsGmV7PPEBPEbhtHqEpxBqkU/ZailOwLgAIWB5LSQoepHbT2WkpUUnqNZpzS02KfA3FwvNGjRrxepucbLoNk8Ka5XGlASmYpai/N9z3G/wDcoH6a50M2s5JiJq9UmeF9pK/srZI53gnOVEnZIJzvuScgDrq4/txT3f6H2zQGSeaoVjxVpB3UhlpZx/qUk+oGqezKomvUuLDXIRClQgpEYK2bcbKirkJ/CoEnBOxzuRgZb0EbQwvcllbJJvDGY/lOq23xTqCzGktqaVEfUh1teQob8wz9FfsdSvwtvAMM1Nqa4zIU5JCIKAxyFtGAdiOvxDrnofPUIcMbV4kXVPlJty3J1aZCg3LJUlDaVDplxZCQoA9M9D5aet125xG4YUX76rFrSIzbSQxHkOOsuNRyokjPhqOTknGe/ftp7FqELowx546LNVujTOLnxi5dwffCUeKl5U12/wCqxhT35khMZmNzxnShSFpSnmwQCevMnUc1Bq2x4S5TTsNaWwHGkSQ64pfc8oGE+hI0z3KxIklxb77oddJUspP9Yonfm/ffTu4ccJuIV/wHqja9BVMhMrLapDkhtlBX3SCtQyfTpoJ1S0Z6JnBp5YzbfP5SjWKnarSaKbeK23hCCJrj8PmCXuYklIKiCMEDOPw5xvr6egzqlOjyfvZqrEcqg2mRhwAdglWCPQA6Z81lNHqkim1ZCjLhOrjustLSUhaVEKHOMg753GRpx2xS7lrUCXVrcoDTsWF/XuhSFKThPN0Wrc4HYaIjkB5yqKmLw/MSB3TrpVqJpdNlzKshDL8ghUZtalhbaQTnOMbnbr29cab1ft5VbXHZpakKnq+ANLTlff3uh2wTk9MaX6Zd17XlBVBpMf7azTmed5srQ34aT35iUnseh1H8O5HGK0iaqW8WglaVNLWVZyhQ5c9wc4z89Wve0M2nqhKaKd0pdfzDp/Sm3hxCvePFYpdw0NUiKygpjyShLgaAGeUjw3ABtgciRucknUe8X37prRLdSob0Ckw1FTQcSnmQPM+Wx3CAlO2eXOkK3rmbbq8Z6LT5DKm3UuFTbynG0AHJUpODlI6keWlS+rs+/WJZXO8RLiOU+E3hGAMZ9PIbeg15HBFIHXPA98q7bURTA2GTnHH0JUg+xbX5dpcWE21NcxDr0UtNjOQXEDxGlD1TzjbrkeWrtzU4WFj8Q1z+s6I9blt2nd786K4qm3FHVEKF5WtjmCnB58vUYPTmO2+ugsvCo6VDcZBzrNahF4cgI6rR0FR4zD/BstPRo0aBRyrR7ej8uPVrBeig+IiTIUjHZQ8LfVaOJotd9uNU7QU74S2wqe25gKZfO5CR+TyP66tr7dkRbFo2rcqGw592VoIcBG3K42rr8soSPrqldx0R+nvfb6clxymTMmO4Oqc7ltXkofuMEbabUjyILAJXUxg1AcTbHyKsbwNv6ya3wHa4ZSb3lWFXW5C1fbW1+EHiVlQIc2GCCAQSk+71xpAvzhzxRo90W9bNwVytX/alVmJeSzDlrWt5DeFKB8Q4bPKrZXNy4Oc6TWeJ3BGcxGTWuCYTNabQhSmJSUpWUgDKinkznHcHTjje0rOh3fGkyLIXHtdiAuHDgx3x4jYJR74XyhJ2QE8oxgd9BhklyQEcZGAAEpz1Xg7w5ncOromuWLPtGZSIa32HzW0y1FaUKVhSUrUBukAgjvsdOKrIsKHwTsOwodHuBDF0ug0thuUG3UPrHOHJCgoHkCnAogZ27bag2fxXt6PwzumzrPsOfRvv10qVKdqJfWoEpyV8wznAUMA4Ge++fL54t1CsXXZddt+33qcxaTaQxFlPBfjYKQdwBgFKQPMddWiGZ3IK4dNE3qFNFP4D8P4NdjWvPsys1Vl1gmZcrtVS2Eu8hV7rQVnBIx02J77nTJtWRS+GlDl04yfHivXC9EbfUQOZPOW0qPbo3k6bl58U+GlxTZdencKaq5XpDfvrVVlpY8TlwFFKSAcYH4RnGooui6/vW1aTQ48R9gQiFuKWsELVy4yP1V+umGnyGHe6S97YHqbpLrdE3UI2QN+EuuT6AA/7U2UigqtmHeiYBS2ao4lqEeyUrBAH0U4R/l0lxeHdpQpEelP0CZUUrbzIqa5YQEKx+FAUD28u/fTDm8Tag5b8CKIb4nR3GluOrUORzkOenXfA181K87aqjxqEu2Jjs9SQFD7SQgkDbODv+mnbpqIjyni3N+5HB7LOx6fqTXEuJG7ktIvgAA/EO/PcKRKO3aNmWFX8MT3oi33IkxaVDxHxzFICdwAAFY7dCdRCxCgVepzVU55yDTfEJjRHFcz7iOyQM7q9Tj10oUO86WxaabfrlDfmNtuKWkIc5QslRUM9CMZ+evnhxTYiq8xVa6r7uo4e8TJJClJznDY6qPz6DudCSyRvdGIzi2RnHdM6SnlpRNJJfcTgkg3HSwvzhbMGrvPUKZRlxizBjltyIk7lDvOB17lSebPoPIa6XxsmjR+b4vCRn1wNc+rok0a8OMNJolqsBumzatGabSEcpVzuJClKA+WfQDXQuUAiMEgYGwGkuqnztbfhPdJF4i+1rlaejRo0qTVNfj5aZvfhFXqEykKkuRS9EH+M376B9SAPrrnjYN1C17nYkVKGKhT8gvwn/geQPwKB8jn0xrqFDUFNlB6p/lqgvthcL3LQv9+q0+ORSK24uTEKR7rT/V5n6n30j5kDRtFKWOsELVQtkblMq6Ydu3DWHqhRVM0tyQouphPnlaAJzhtzGMfJWPU6cFj2JezjMh6nUoyYzLReebIQ8ytI8hukn031HtqLanlukyXUNuH+ocJG2fwk6V4tYrttreagzJDAdQULLayOZPcHzGtHGGkeIFnqhkg/wtP1U4cKKPbLtzMC5bKlxOY8qzHQ4GFHHVSFg43/ACqA+WlW9bMtd25C/R6hTIUcOYSzIdShxKcdgRjHzz07are1c85yfHU9OfV7ycFSiQnf9++nKzcsSmhb9TjMy0AK5Y7iyFLUR1yO4O47bY0Q17Dd7XWA6dErloJ9wvm/19OfRSdcdiU+LRn3EM1Gor5Ujlo6UuAgqGcL9P7p740xIVKflVdulUe1hSlrUltEicyXXiSQkAqX7oJJAHKkajubXpbtQcqbLxjc6spQwrCmwNgMjptjfvpetjiVc0WtRFisLy06lTYmueIwlQ6KUF5AI88fTQbqhrj5kxi06aJlgbp0f9O6oqRNVKj/AGkMuqQqQ4+ltAUDggqX7pxvtnOtu0rfsSnVtRu+pxHIjaSVMU1wuuk9snBQN+u+osvG9Kzc9Vfnznk87yytSWkBCeY9TypAGTv20nRJj7j4bcWPFdASCXAkHfbnPQep+uuf1TAbWV/7fM9nmcnPfFRoEae5/R+m/wALmIbdlELXj5JACR++my/IkuNGZJkKdeUeis7Db6fLGvG4zkmaS+pICFlKikgoGPIjY9DvpWqpp1TmRYtKjPmLHbSl49VyHSeiQPzE8qR176jruBkOPQIuKMRARjPqVL/sQ2g7XeLLVbkNkxqJHVMWo9PFWORpPrjnV9NXsnK+FH1Oo69mrh2rh5w3Yiz20JrNQV9sqRH4Vke62PkhOE+udP55fO4VfprN1EniPJHCcRM2tsvnRo0apVi+mlltYUNJPEuy6NxBs6XbtYbJZkJ5mnkD+JHcHwuIPZQP67jvpU1ljvFs4O6T+2oCRkKLmVxX4fXBYd2yKPVI/hzG8uNuIHuS2s7PN/8AsnqDn6YaDcNNmsCHXkqKj8MhB97cd/rjfXR7ibYNtcRLcNHuCL4iQeePJbPK9Hc7LQrsf2PfVGuNHAi77AlPzjHcqdKOeWrQmSpISR/btjJbPbmGR+unNHXlp92KXVVG2QZ/sKM6zRltveIz/FZJ5kOIG2M6+aohyosMqQU+KjZSQCM/MawQZVRpSFLSsra/DypDjS998nt/PTvt65LVkuAVqjuIUerkRzAz58qv/um8QgluL7b9EumfNAAdu63omjHpEtIStTS0dcEp663KhTQ7MW88wzG5sq8JpBCRt67ana2l8JpMXmfrU6KMZ5FxwP5KOka6a1wxhLWYpqc856cqUA7fmyT+2jDRU4HP2SluszuftEZULqpcgR0rahpDbiilKxuSRjP8xrK5SG4rZcqDn2YBGQjGCo/IfPfS7WrvQ4pTVCpTURLhIG/jOfv0/TSPRbdrtzVluDGiTajPePuxIrZdfPqBsgeZVjGl8xp4vgyfsnUDqiUefy/lJiVPVB1bUcJYjpSCtR2ShI7qP/7OrceyHwSUlyHflywVNRmcO0eG+n3nVEf904nt/cT26/PS1wC9mmPRVxa7fzcaRJaUHYtIaPOywvst1X9qv5fCPnqyjzqWU8qMZxsPLSOqrC+7Wn5prFDbJXzLd5U+GOp661NBJJJJyTo0vRKNGjRqKI0aNGoosjLqmztuPLW2lbL6ChQBChgpUOo1oa9T8Q9dRRRvf/s88NrsfdmopjlCqDhJXKpS/BKie6kYKFH6aha4/ZArTbi3KHdFKno/CmbDUw56FTZIPrgauGPhGjV0dRIzAKrdG13IVF3PZZ4nMq5W4tBdT+ZFUcSP0KNblN9k7iBJdAnSrbhpPVRkPPkfQAA6u6e+vO2rv185FrqsUsV72VabO9kqgw1Jcua5p1RH4osBlMNk/IkErV+o1O1l2ZallU77DbNDg0tj8ZZbAUs+alH3lH5knTg1rT+idDPle8+Y3VzWNbwEPSR8LY+utUkk5JydGjXC6Ro0aNRRGjRo1FF//9k=" alt="SafeNet">
+    <div class="logo-name">VPC <em>Safe</em>Net</div>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Технологии</a>
+    <a href="#club">Клуб</a>
+    <a href="#pricing">Тарифы</a>
+    <a href="#form">Подключиться</a>
+  </div>
+  <div class="nav-right">
+    <div class="live-badge">ONLINE</div>
+    <a href="#form" class="btn-nav">Войти в клуб</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <div class="hero-text">
+      <div class="h-eyebrow">Закрытый клуб Инвестея · Черногория · EU Infrastructure</div>
+      <h1>Международный гигабайтный интернет</h1>
+      <div class="h1-sub">— новая волна цифровой свободы</div>
+      <p class="hero-desc">
+        Персональный VPC-туннель нового поколения. Без блокировок. Без слежки. Без цифровых границ. Скорость до 1 Gb/s через защищённую инфраструктуру Европы.
+      </p>
+      <div class="cta-group">
+        <a href="#form" class="btn-main">🔐 Получить доступ через клуб</a>
+        <a href="#form" class="btn-free">🎁 Попробовать бесплатно 3 дня</a>
+      </div>
+      <div class="trust-chips">
+        <div class="tchip"><div class="tchip-dot tc"></div>AES-256</div>
+        <div class="tchip"><div class="tchip-dot tg"></div>No-Logs</div>
+        <div class="tchip"><div class="tchip-dot tv"></div>Stealth Protocol</div>
+        <div class="tchip"><div class="tchip-dot tb"></div>Anti-DPI</div>
+        <div class="tchip"><div class="tchip-dot to"></div>1 Gb/s</div>
+        <div class="tchip"><div class="tchip-dot tc"></div>EU Servers</div>
+      </div>
+    </div>
+
+    <div class="globe-wrap" id="globeScene">
+
+      <!-- Canvas 3D Globe -->
+      <canvas id="globeCanvas" width="480" height="480"
+              style="position:absolute;inset:0;z-index:1;"></canvas>
+
+      <!-- Data tags -->
+      <div class="dtag dt1" style="animation-delay:0s">▲ 984 Mb/s</div>
+      <div class="dtag dt2" style="animation-delay:0.8s">🔒 AES-256</div>
+      <div class="dtag dt3" style="animation-delay:1.6s">📍 Montenegro EU</div>
+      <div class="dtag dt4" style="animation-delay:2.4s">✓ No-logs</div>
+
+      <!-- YouTube 4K -->
+      <div class="inode in-yt" style="top:12%;left:6%;animation-delay:0s">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="2" y="4" width="20" height="16" rx="4" stroke="#ff4444" stroke-width="1.5"/>
+          <path d="M10 8.5L16 12L10 15.5V8.5Z" fill="#ff4444"/>
+        </svg>
+        <span class="inode-label">YouTube 4K</span>
+      </div>
+
+      <!-- Telegram -->
+      <div class="inode in-tg" style="top:12%;right:6%;animation-delay:1s">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 11L21 4L18 20L12 15L9 18V14L3 11Z" stroke="#00b4ff" stroke-width="1.5" fill="none" stroke-linejoin="round"/>
+          <path d="M12 15L9 11L21 4" stroke="#00b4ff" stroke-width="1.3" fill="none" stroke-linejoin="round"/>
+        </svg>
+        <span class="inode-label">Telegram</span>
+      </div>
+
+      <!-- ChatGPT / AI -->
+      <div class="inode in-ai" style="bottom:16%;left:6%;animation-delay:2s">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="12" cy="12" r="9" stroke="#a78bfa" stroke-width="1.5"/>
+          <circle cx="12" cy="12" r="4" stroke="#a78bfa" stroke-width="1.3"/>
+          <line x1="12" y1="3" x2="12" y2="5" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="12" y1="19" x2="12" y2="21" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="3" y1="12" x2="5" y2="12" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="19" y1="12" x2="21" y2="12" stroke="#a78bfa" stroke-width="1.5" stroke-linecap="round"/>
+          <line x1="5.6" y1="5.6" x2="7" y2="7" stroke="#a78bfa" stroke-width="1.3" stroke-linecap="round"/>
+          <line x1="17" y1="17" x2="18.4" y2="18.4" stroke="#a78bfa" stroke-width="1.3" stroke-linecap="round"/>
+        </svg>
+        <span class="inode-label">ChatGPT / AI</span>
+      </div>
+
+      <!-- Privacy Shield -->
+      <div class="inode in-lock" style="bottom:16%;right:6%;animation-delay:3s">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 3L4 7V12C4 16.4 7.4 20.5 12 21.5C16.6 20.5 20 16.4 20 12V7L12 3Z"
+                stroke="#00ff88" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M9 12L11 14L15 10" stroke="#00ff88" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="inode-label">Privacy</span>
+      </div>
+
+      <!-- SafeNet Logo Center -->
+      <div class="logo-center" style="z-index:35;width:82px;height:82px;border:2.5px solid rgba(0,212,255,0.65);animation:logo-glow 3s ease-in-out infinite;">
+        <svg viewBox="0 0 82 82" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:100%;border-radius:50%;display:block;">
+          <defs>
+            <radialGradient id="lc-bg" cx="38%" cy="30%">
+              <stop offset="0%"  stop-color="#0d3060"/>
+              <stop offset="100%" stop-color="#030e20"/>
+            </radialGradient>
+          </defs>
+          <circle cx="41" cy="41" r="41" fill="url(#lc-bg)"/>
+          <ellipse cx="41" cy="41" rx="33" ry="8"  fill="none" stroke="rgba(0,212,255,0.2)" stroke-width="0.8"/>
+          <ellipse cx="41" cy="41" rx="33" ry="20" fill="none" stroke="rgba(0,212,255,0.15)" stroke-width="0.8"/>
+          <circle  cx="41" cy="41" r="33" fill="none" stroke="rgba(0,212,255,0.18)" stroke-width="0.8"/>
+          <path d="M41 16 L58 23 L58 38 Q58 54 41 62 Q24 54 24 38 L24 23 Z"
+                fill="rgba(0,102,255,0.28)" stroke="rgba(0,212,255,0.65)" stroke-width="1.3" stroke-linejoin="round"/>
+          <path d="M30 44 Q41 35 52 44" stroke="#00d4ff" stroke-width="1.8" fill="none" stroke-linecap="round" opacity="0.75"/>
+          <path d="M34 48 Q41 42 48 48" stroke="#00d4ff" stroke-width="1.9" fill="none" stroke-linecap="round" opacity="0.9"/>
+          <circle cx="41" cy="51" r="2.2" fill="#00d4ff"/>
+          <text x="41" y="31" font-family="'JetBrains Mono',monospace" font-size="7.5" font-weight="700" fill="#f0f4ff" text-anchor="middle" letter-spacing="0.5">VPC</text>
+          <text x="41" y="40" font-family="'JetBrains Mono',monospace" font-size="7" font-weight="700" fill="#00d4ff" text-anchor="middle" letter-spacing="0.3">SafeNet</text>
+        </svg>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-row sr">
+  <div class="stats-grid">
+
+    <div class="stat stat-blue">
+      <span class="stat-icon">⚡</span>
+      <div class="stat-n">до 1Gb</div>
+      <div class="stat-l">Скорость канала</div>
+    </div>
+
+    <div class="stat stat-purple">
+      <span class="stat-icon">🎁</span>
+      <div class="stat-n">∞ GB</div>
+      <div class="stat-l">Трафик безлимит</div>
+    </div>
+
+    <div class="stat stat-teal">
+      <span class="stat-icon">🛡</span>
+      <div class="stat-n">99.9%</div>
+      <div class="stat-l">Аптайм сервиса</div>
+    </div>
+
+    <div class="stat stat-indigo">
+      <span class="stat-icon" style="font-size:0;display:flex;align-items:center;justify-content:center;">
+        <img src="investeya-avatar.png" style="width:62px;height:62px;border-radius:50%;object-fit:cover;border:2px solid rgba(124,58,237,0.6);box-shadow:0 0 16px rgba(124,58,237,0.5);"/>
+      </span>
+      <div class="stat-n" style="color:#b060ff;text-shadow:0 0 20px rgba(124,58,237,0.8),0 0 40px rgba(124,58,237,0.4);">24/7</div>
+      <div class="stat-l">AI + Live поддержка</div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="sr">
+    <div class="s-eye">// ТЕХНОЛОГИИ</div>
+    <div class="s-title">Всё, что нужно бизнесу<br>в цифровую эпоху</div>
+    <div class="s-sub">Не классический VPN. Персональная VPC-инфраструктура нового поколения для предпринимателей, инвесторов и digital nomads.</div>
+  </div>
+  <div class="feat-grid sr">
+    <div class="fc">
+      <div class="badge bc">ANTI-DPI</div>
+      <div class="fi fi-c">🛡</div>
+      <div class="ft">Stealth-протокол</div>
+      <div class="fd">Трафик маскируется под HTTPS. Системы глубокой инспекции пакетов не обнаруживают туннель. Обход РКН на уровне протокола.</div>
+    </div>
+    <div class="fc">
+      <div class="badge bc">AES-256</div>
+      <div class="fi fi-b">🔐</div>
+      <div class="ft">Военное шифрование</div>
+      <div class="fd">AES-256-GCM + ECDH обмен ключами. Нулевое знание о вашем трафике. No-logs policy подтверждена юрлицом ЕС.</div>
+    </div>
+    <div class="fc">
+      <div class="badge bv">VLESS / WG</div>
+      <div class="fi fi-v">⚡</div>
+      <div class="ft">До 1 Gb/s скорость</div>
+      <div class="fd">Протоколы VLESS и WireGuard. YouTube 4K, Zoom без лагов, ChatGPT, стриминг — всё без ограничений скорости.</div>
+    </div>
+    <div class="fc">
+      <div class="fi fi-g">📱</div>
+      <div class="ft">Все устройства</div>
+      <div class="fd">iPhone, Android, Mac, Windows. Пошаговые видеоинструкции. Подключение за 3 минуты. До 3 устройств на Pro.</div>
+    </div>
+    <div class="fc">
+      <div class="fi fi-o">📋</div>
+      <div class="ft">Официальный договор</div>
+      <div class="fd">Юрлицо в Черногории (ЕС). Договор-оферта, счёт, закрывающие документы для ИП и ООО. Легальная бухгалтерия.</div>
+    </div>
+    <div class="fc">
+      <div class="badge bg">30% навсегда</div>
+      <div class="fi fi-c">🤝</div>
+      <div class="ft">Партнёрская программа</div>
+      <div class="fd">30% ежемесячно с каждого участника. Реферальные ссылки в Telegram-боте. Статус «Резидент» клуба Инвестея.</div>
+    </div>
+  </div>
+</section>
+
+<!-- EMOTION -->
+<div class="emotion-block">
+  <div class="emotion-card sr">
+    <div class="emo-wave">// НОВАЯ ВОЛНА УЖЕ НАЧАЛАСЬ</div>
+    <div class="emo-title">
+      Мир меняется.<br>
+      <em>Бизнесу нужен собственный<br>международный интернет.</em>
+    </div>
+    <div class="emo-text">
+      Государства ограничивают трафик. Сервисы становятся недоступными.<br>
+      <strong>Бизнесу нужен не VPN.</strong><br>
+      Бизнесу нужна персональная VPC-инфраструктура — надёжная, защищённая, международная.
+    </div>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap">
+      <a href="#form" class="btn-main">Получить доступ через клуб</a>
+      <a href="#pricing" class="btn-free">Посмотреть тарифы</a>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     INVESTEYA — CYBERPUNK GODDESS BLOCK
+     ═══════════════════════════════════════════════ -->
+<div class="club-hero-wrap sr">
+  <div class="club-hero-card">
+
+    <!-- LEFT — TEXT -->
+    <div class="club-hero-content">
+      <div class="ch-eye">// Закрытый клуб · Цифровой гид</div>
+      <div class="ch-title">Инвестея — ваш проводник<br>в <em>цифровую свободу</em></div>
+      <div class="ch-desc">
+        Закрытый клуб нового поколения для предпринимателей, инвесторов и digital nomads.
+        Персональный AI-гид сопроводит вас от первого подключения до статуса Резидента — безопасно, быстро, в Telegram.
+      </div>
+      <div class="ch-items">
+        <div class="ch-item"><div class="ch-dot"></div>Персональный AI-ассистент в Telegram 24/7</div>
+        <div class="ch-item"><div class="ch-dot"></div>Безопасный onboarding и настройка</div>
+        <div class="ch-item"><div class="ch-dot"></div>Уроки цифровой экономики и Web3</div>
+        <div class="ch-item"><div class="ch-dot"></div>Реферальная программа 30% навсегда</div>
+        <div class="ch-item"><div class="ch-dot"></div>Участие в образовательной клубной программе «Инвестея».</div>
+      </div>
+      <a href="#form" class="btn-main" style="display:inline-flex;margin-top:4px;">Вступить в клуб Инвестея →</a>
+    </div>
+
+    <!-- RIGHT — SVG GODDESS -->
+    <div class="club-hero-visual" style="min-height:400px;background:#030a14;">
+
+      <!-- REAL INVESTEYA PHOTO -->
+      <img src="investeya2.png" class="investeya-img"
+           style="position:absolute;inset:0;width:100%;height:100%;
+                  object-fit:contain;object-position:left center;
+                  background:#030a14;z-index:1;opacity:0.95;"/>
+
+      <!-- CYBER OVERLAY (particles / grid / binary on top of photo) -->
+      <svg viewBox="0 0 420 300" preserveAspectRatio="xMidYMid slice"
+           xmlns="http://www.w3.org/2000/svg"
+           style="position:absolute;inset:0;width:100%;height:100%;display:block;z-index:3;pointer-events:none;">
+        <defs>
+          <filter id="ov-glow" x="-60%" y="-60%" width="220%" height="220%">
+            <feGaussianBlur stdDeviation="3.5" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Faint cyber grid overlay -->
+        <g stroke="rgba(0,200,255,0.07)" stroke-width="0.6">
+          <line x1="0"   y1="75"  x2="420" y2="75"/>
+          <line x1="0"   y1="150" x2="420" y2="150"/>
+          <line x1="0"   y1="225" x2="420" y2="225"/>
+          <line x1="70"  y1="0"   x2="70"  y2="300"/>
+          <line x1="140" y1="0"   x2="140" y2="300"/>
+          <line x1="210" y1="0"   x2="210" y2="300"/>
+          <line x1="280" y1="0"   x2="280" y2="300"/>
+          <line x1="350" y1="0"   x2="350" y2="300"/>
+        </g>
+
+        <!-- Floating binary code -->
+        <text x="18" y="62" font-family="'JetBrains Mono',monospace" font-size="10"
+              fill="rgba(0,212,255,0.32)" letter-spacing="2">
+          01101001
+          <animate attributeName="opacity" values="0.4;0.9;0.4" dur="5s" repeatCount="indefinite"/>
+        </text>
+        <text x="340" y="110" font-family="'JetBrains Mono',monospace" font-size="9"
+              fill="rgba(176,64,255,0.30)" letter-spacing="2">
+          10110010
+          <animate attributeName="opacity" values="0.3;0.85;0.3" dur="4.3s" begin="1s" repeatCount="indefinite"/>
+        </text>
+        <text x="14" y="195" font-family="'JetBrains Mono',monospace" font-size="9"
+              fill="rgba(0,255,200,0.25)" letter-spacing="2">
+          11001001
+          <animate attributeName="opacity" values="0.25;0.75;0.25" dur="6s" begin="2s" repeatCount="indefinite"/>
+        </text>
+        <text x="340" y="245" font-family="'JetBrains Mono',monospace" font-size="9"
+              fill="rgba(255,80,180,0.25)" letter-spacing="2">
+          01010110
+          <animate attributeName="opacity" values="0.28;0.80;0.28" dur="4.8s" begin="0.5s" repeatCount="indefinite"/>
+        </text>
+
+        <!-- Floating particles -->
+        <circle cx="32" cy="88" r="3" fill="#b040ff" opacity="0.6" filter="url(#ov-glow)">
+          <animate attributeName="cy" values="88;62;88" dur="4.2s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1" keyTimes="0;0.5;1"/>
+          <animate attributeName="opacity" values="0.3;0.75;0.3" dur="4.2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="390" cy="55" r="3.5" fill="#00ccff" opacity="0.5" filter="url(#ov-glow)">
+          <animate attributeName="cy" values="55;28;55" dur="5.1s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1" keyTimes="0;0.5;1"/>
+          <animate attributeName="opacity" values="0.22;0.65;0.22" dur="5.1s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="28" cy="210" r="2.5" fill="#ff50c0" opacity="0.55" filter="url(#ov-glow)">
+          <animate attributeName="cy" values="210;185;210" dur="3.7s" repeatCount="indefinite" calcMode="spline" keySplines="0.5 0 0.5 1;0.5 0 0.5 1" keyTimes="0;0.5;1"/>
+          <animate attributeName="opacity" values="0.28;0.70;0.28" dur="3.7s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="395" cy="240" r="3" fill="#00ffcc" opacity="0.42" filter="url(#ov-glow)">
+          <animate attributeName="cy" values="240;212;240" dur="4.8s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.18;0.60;0.18" dur="4.8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="55" cy="268" r="2" fill="#ffd700" opacity="0.55" filter="url(#ov-glow)">
+          <animate attributeName="cy" values="268;248;268" dur="3.4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.28;0.72;0.28" dur="3.4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="370" cy="285" r="2.5" fill="#b040ff" opacity="0.50" filter="url(#ov-glow)">
+          <animate attributeName="cy" values="285;262;285" dur="4s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.25;0.68;0.25" dur="4s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="200" cy="18" r="2.2" fill="#00d4ff" opacity="0.45" filter="url(#ov-glow)">
+          <animate attributeName="cy" values="18;4;18" dur="3.9s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values="0.22;0.65;0.22" dur="3.9s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Sparkle diamonds -->
+        <path d="M 48,136 L 51,143 L 58,136 L 51,129 Z" fill="#ffd700" opacity="0.65" filter="url(#ov-glow)">
+          <animate attributeName="opacity" values="0.28;0.88;0.28" dur="2.3s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 364,162 L 367,169 L 374,162 L 367,155 Z" fill="#00d4ff" opacity="0.58" filter="url(#ov-glow)">
+          <animate attributeName="opacity" values="0.22;0.80;0.22" dur="2.8s" begin="0.9s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 38,258 L 41,264 L 47,258 L 41,252 Z" fill="#b040ff" opacity="0.52" filter="url(#ov-glow)">
+          <animate attributeName="opacity" values="0.18;0.74;0.18" dur="3.2s" begin="0.4s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 385,190 L 388,196 L 394,190 L 388,184 Z" fill="#ff50c0" opacity="0.48" filter="url(#ov-glow)">
+          <animate attributeName="opacity" values="0.20;0.70;0.20" dur="3.6s" begin="1.5s" repeatCount="indefinite"/>
+        </path>
+      </svg><!-- end SVG -->
+
+      <!-- Badge overlay -->
+      <div class="cv-badge" style="display:flex;align-items:center;gap:9px;">
+        <img src="investeya-avatar.png" style="width:28px;height:28px;border-radius:50%;object-fit:cover;border:1.5px solid rgba(176,96,255,0.6);flex-shrink:0;"/>
+        <span>AI-гид · Инвестея</span>
+      </div>
+
+    </div><!-- end club-hero-visual -->
+  </div><!-- end club-hero-card -->
+</div><!-- end club-hero-wrap -->
+
+<!-- CLUB ONBOARDING -->
+<section class="section" id="club">
+  <div class="sr">
+    <div class="s-eye">// ОБРАЗОВАТЕЛЬНАЯ КЛУБНАЯ ПРОГРАММА</div>
+    <div class="s-title" style="background:linear-gradient(135deg,#00d4ff 0%,#a78bfa 60%,#7c3aed 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;font-size:clamp(22px,3vw,40px);">Образовательная клубная программа «Инвестея»</div>
+    <div class="s-sub" style="max-width:860px;">
+      «Инвестея» — это образовательная клубная программа с материалами, практическими заданиями, клубными встречами, обратной связью и организационным сопровождением.
+      <br><br>
+      Участник получает доступ к вспомогательным инструментам программы: личному кабинету, боту, каналу, чату, инструкциям и учебным материалам. Эти инструменты используются только для организации образовательного процесса и не являются самостоятельным цифровым продуктом, программным обеспечением, SaaS-сервисом, базой данных или автоматизированной электронной услугой.
+      <br><br>
+      Программа организуется Исполнителем с территории Черногории. Участие в программе не является инвестиционной, брокерской, банковской, юридической, налоговой или бухгалтерской услугой. Исполнитель не гарантирует получение дохода, прибыли, инвестиционного результата или иной конкретной выгоды.
+    </div>
+  </div>
+  <div class="club-grid sr">
+    <div class="club-steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <div class="step-content">
+          <div class="st">Заполните форму на сайте</div>
+          <div class="sd">Введите имя и Telegram username. Бот клуба напишет вам автоматически.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <div class="step-content">
+          <div class="st">Безопасный onboarding в боте</div>
+          <div class="sd">AI-бот проведёт вас через все шаги регистрации и выбора тарифа.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <div class="step-content">
+          <div class="st">Получение персонального ключа</div>
+          <div class="sd">Автоматическая генерация уникального VPC-ключа доступа для вас.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <div class="step-content">
+          <div class="st">Видеоинструкция по установке</div>
+          <div class="sd">Подробные видео для Android, iOS, Mac, Windows. Всё в боте.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">05</div>
+        <div class="step-content">
+          <div class="st">Поддержка + автопродление</div>
+          <div class="sd">AI-бот + живая техподдержка 24/7. Автоматическое продление доступа.</div>
+        </div>
+      </div>
+    </div>
+    <div class="club-visual">
+      <div class="cv-title">// Что входит в клуб</div>
+      <div class="cv-item" style="border-bottom:1px solid rgba(176,96,255,0.18);padding:16px 0;">
+        <div class="cv-ic" style="background:transparent;width:42px;height:42px;border-radius:50%;overflow:hidden;flex-shrink:0;border:2px solid rgba(176,96,255,0.55);box-shadow:0 0 14px rgba(176,96,255,0.4);">
+          <img src="investeya-avatar.png" style="width:100%;height:100%;object-fit:cover;"/>
+        </div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px;">Организационный бот клуба</div>
+          <div style="font-size:12px;color:var(--muted);">Персональный AI-ассистент · 24/7</div>
+        </div>
+      </div>
+      <div class="cv-item" style="border-bottom:1px solid rgba(0,255,136,0.12);padding:16px 0;">
+        <div class="cv-ic" style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.25);box-shadow:0 0 10px rgba(0,255,136,0.12);">🔑</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px;">Персональный идентификатор участника</div>
+          <div style="font-size:12px;color:var(--muted);">Dоступ к материалам программы</div>
+        </div>
+      </div>
+      <div class="cv-item" style="border-bottom:1px solid rgba(124,58,237,0.15);padding:16px 0;">
+        <div class="cv-ic" style="background:rgba(124,58,237,0.1);border:1px solid rgba(124,58,237,0.25);box-shadow:0 0 10px rgba(124,58,237,0.12);">📖</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px;">Инструкции по участию</div>
+          <div style="font-size:12px;color:var(--muted);">Учебные материалы · практика · клубные встречи</div>
+        </div>
+      </div>
+      <div class="cv-item" style="border-bottom:1px solid rgba(0,102,255,0.15);padding:16px 0;">
+        <div class="cv-ic" style="background:rgba(0,102,255,0.1);border:1px solid rgba(0,102,255,0.25);box-shadow:0 0 10px rgba(0,102,255,0.12);">🔄</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px;">Продление участия в программе</div>
+          <div style="font-size:12px;color:var(--muted);">Aвтоматическое продление · без перебоев</div>
+        </div>
+      </div>
+      <div class="cv-item" style="border-bottom:1px solid rgba(0,255,204,0.12);padding:16px 0;">
+        <div class="cv-ic" style="background:rgba(0,255,204,0.1);border:1px solid rgba(0,255,204,0.25);box-shadow:0 0 10px rgba(0,255,204,0.10);">💎</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px;">Реферальная программа участника</div>
+          <div style="font-size:12px;color:var(--muted);">30% ежемесячно · навсегда</div>
+        </div>
+      </div>
+      <div class="cv-item" style="padding:16px 0;">
+        <div class="cv-ic" style="background:rgba(0,212,255,0.08);border:1px solid rgba(0,212,255,0.2);box-shadow:0 0 10px rgba(0,212,255,0.08);">📋</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--white);margin-bottom:2px;">Публичная оферта</div>
+          <div style="font-size:12px;color:var(--muted);">Oферта на участие в образовательной программе</div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="sr">
+    <div class="s-eye">// ТАРИФЫ</div>
+    <div class="s-title" style="background:linear-gradient(135deg,#00d4ff 0%,#a78bfa 60%,#7c3aed 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;white-space:nowrap;font-size:clamp(22px,3vw,42px);">Прозрачные цены без скрытых условий</div>
+    <div class="s-sub">Стоимость участия в образовательной клубной программе «Инвестея». Без скрытых платежей и навязанных условий.</div>
+  </div>
+  <div class="price-grid sr">
+
+    <!-- СТАНДАРТ -->
+    <div class="pc">
+      <div class="p-name">СТАНДАРТ</div>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+        <div class="p-price" style="text-decoration:line-through;color:var(--muted);font-size:32px;"><sup style="font-size:16px">₽</sup>1 490</div>
+        <div style="font-size:36px;font-weight:900;color:#ff4444;letter-spacing:-1px;">499 руб</div>
+      </div>
+      <div class="p-period">за 1 месяц · Базовый формат</div>
+      <div class="p-note" style="color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:20px;">Для самостоятельного прохождения программы с базовым организационным сопровождением.</div>
+      <ul class="p-features">
+        <li>Участие в образовательной клубной программе</li>
+        <li>Доступ к учебным материалам программы</li>
+        <li>Вспомогательный личный кабинет участника</li>
+        <li>Организационный бот клуба</li>
+        <li>Инструкции по участию</li>
+        <li>Поддержка по организационным вопросам в Telegram</li>
+        <li>Доступ к клубным уведомлениям и материалам</li>
+      </ul>
+      <button class="btn-price-out" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'})">Начать участие</button>
+    </div>
+
+    <!-- PRO -->
+    <div class="pc hot">
+      <div class="p-name">PRO</div>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+        <div class="p-price" style="text-decoration:line-through;color:var(--muted);font-size:32px;"><sup style="font-size:16px">₽</sup>2 490</div>
+        <div style="font-size:36px;font-weight:900;color:#ff4444;letter-spacing:-1px;">1 500 руб</div>
+      </div>
+      <div class="p-period">за 1 месяц · Расширенный формат</div>
+      <div class="p-note" style="color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:20px;">Для участников с расширенным доступом к материалам, заданиям и обратной связи.</div>
+      <ul class="p-features">
+        <li>Всё, что входит в формат «Стандарт»</li>
+        <li>Расширенный доступ к учебным материалам</li>
+        <li>Практические задания и рекомендации</li>
+        <li>Приоритетная организационная поддержка</li>
+        <li>Участие в клубных эфирах и разборах</li>
+        <li>Обратная связь в пределах формата участия</li>
+        <li>Инструменты программы для нескольких устройств</li>
+        <li>Информация о партнёрской программе клуба</li>
+      </ul>
+      <button class="btn-price-main" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'})">Участвовать в формате Pro →</button>
+    </div>
+
+    <!-- КОРПОРАТИВНЫЙ -->
+    <div class="pc">
+      <div class="p-name">КОРПОРАТИВНЫЙ</div>
+      <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;">
+        <div class="p-price" style="text-decoration:line-through;color:var(--muted);font-size:32px;"><sup style="font-size:16px">₽</sup>7 990</div>
+        <div style="font-size:36px;font-weight:900;color:#ff4444;letter-spacing:-1px;">5 900 руб</div>
+      </div>
+      <div class="p-period">за 1 месяц · До 5 участников</div>
+      <div class="p-note" style="color:var(--muted);font-size:12px;line-height:1.5;margin-bottom:20px;">Для компаний и команд, которым требуется организационное подключение нескольких участников.</div>
+      <ul class="p-features">
+        <li>Участие до 5 представителей компании</li>
+        <li>Образовательные материалы для команды</li>
+        <li>Организационное подключение участников</li>
+        <li>Клубные инструкции и сопровождение</li>
+        <li>Персональный менеджер по организационным вопросам</li>
+        <li>Документы для оформления участия</li>
+        <li>Приоритетная коммуникация по вопросам программы</li>
+        <li>Доступ к вспомогательным инструментам программы</li>
+      </ul>
+      <button class="btn-price-out" onclick="document.getElementById('form').scrollIntoView({behavior:'smooth'})">Подключить команду</button>
+    </div>
+
+  </div>
+</section>
+
+<!-- FORM -->
+<div class="form-wrap" id="form">
+  <div class="form-card sr">
+    <div class="fl">
+      <div class="fl-eye">// ВХОД В КЛУБ</div>
+      <div class="fl-title">Начните с 3 дней<br>бесплатно</div>
+      <div class="fl-desc">Заполните форму — Telegram-бот клуба Инвестея напишет вам автоматически и проведёт через onboarding.</div>
+      <ul class="blist">
+        <li><div class="bic" style="background:rgba(0,212,255,0.1)">⚡</div>Подключение за 3 минуты</li>
+        <li><div class="bic" style="background:rgba(0,255,136,0.1)">✓</div>5 GB трафика в тестовый период</li>
+        <li><div class="bic" style="background:rgba(124,58,237,0.1)">🔐</div>Личный VPC-туннель, не шаренный</li>
+        <li><div class="bic" style="background:rgba(255,215,0,0.1)">📋</div>Договор для бизнеса (юрлицо ЕС)</li>
+        <li><div class="bic" style="background:rgba(0,102,255,0.1)">💬</div>AI-бот + поддержка на русском 24/7</li>
+      </ul>
+    </div>
+    <div class="fr">
+      <div id="formState">
+        <div class="pill">🎁 3 дня бесплатно · 5 GB трафика</div>
+
+        <div style="margin-bottom:12px;">
+          <div style="font-size:13px;color:var(--muted);line-height:1.65;margin-bottom:28px;">
+            Выберите удобный способ подключения.<br>
+            Бот клуба проведёт вас через onboarding автоматически.
+          </div>
+        </div>
+
+        <!-- Telegram button -->
+        <a href="https://t.me/VPC_SafeNet" target="_blank"
+           style="display:flex;align-items:center;justify-content:center;gap:12px;
+                  width:100%;padding:17px;margin-bottom:16px;
+                  background:linear-gradient(135deg,#229ED9,#0088cc);
+                  border:none;border-radius:13px;color:#fff;
+                  font-size:16px;font-weight:800;text-decoration:none;
+                  font-family:'Outfit',sans-serif;letter-spacing:.3px;
+                  box-shadow:0 6px 0 rgba(0,80,130,0.7),0 8px 28px rgba(34,158,217,0.4),inset 0 1px 0 rgba(255,255,255,0.2);
+                  transition:transform .15s,box-shadow .15s;"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 0 rgba(0,80,130,0.7),0 16px 40px rgba(34,158,217,0.55),inset 0 1px 0 rgba(255,255,255,0.2)'"
+           onmouseout="this.style.transform='';this.style.boxShadow='0 6px 0 rgba(0,80,130,0.7),0 8px 28px rgba(34,158,217,0.4),inset 0 1px 0 rgba(255,255,255,0.2)'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22 2L11 13" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Подключиться через Telegram
+        </a>
+
+        <!-- VK button -->
+        <a href="https://vk.com/vpc_safenet" target="_blank"
+           style="display:flex;align-items:center;justify-content:center;gap:12px;
+                  width:100%;padding:17px;
+                  background:linear-gradient(135deg,#2787F5,#1a6fd4);
+                  border:none;border-radius:13px;color:#fff;
+                  font-size:16px;font-weight:800;text-decoration:none;
+                  font-family:'Outfit',sans-serif;letter-spacing:.3px;
+                  box-shadow:0 6px 0 rgba(0,50,140,0.7),0 8px 28px rgba(39,135,245,0.35),inset 0 1px 0 rgba(255,255,255,0.2);
+                  transition:transform .15s,box-shadow .15s;"
+           onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 0 rgba(0,50,140,0.7),0 16px 40px rgba(39,135,245,0.5),inset 0 1px 0 rgba(255,255,255,0.2)'"
+           onmouseout="this.style.transform='';this.style.boxShadow='0 6px 0 rgba(0,50,140,0.7),0 8px 28px rgba(39,135,245,0.35),inset 0 1px 0 rgba(255,255,255,0.2)'">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M2 7C2 4.239 4.239 2 7 2H17C19.761 2 22 4.239 22 7V17C22 19.761 19.761 22 17 22H7C4.239 22 2 19.761 2 17V7Z"/>
+            <path d="M12.5 15.5C8.5 15.5 6.2 12.8 6.1 8.3H8.2C8.3 11.6 9.7 13 10.8 13.3V8.3H12.8V11.1C13.9 11 15 9.6 15.4 8.3H17.4C17.1 9.9 15.8 11.3 14.9 11.9C15.8 12.4 17.3 13.6 17.8 15.5H15.6C15.2 14.3 14.2 13.4 12.8 13.2V15.5H12.5Z" fill="#2787F5"/>
+          </svg>
+          Подключиться через ВКонтакте
+        </a>
+
+        <p class="fnote" style="margin-top:18px;">Безопасное соединение · Без передачи данных третьим лицам</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- LEGAL BLOCK -->
+<div class="legal-wrap">
+  <div class="legal-doc sr">
+
+    <!-- Header: SafeNet logo | title | law icon -->
+    <div class="legal-doc-header">
+
+      <!-- LEFT: SafeNet logo -->
+      <div class="legal-doc-side">
+        <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" width="80" height="80">
+          <defs>
+            <radialGradient id="sn-g" cx="35%" cy="30%">
+              <stop offset="0%"  stop-color="#1a4a8a"/>
+              <stop offset="60%" stop-color="#0a2050"/>
+              <stop offset="100%" stop-color="#030d24"/>
+            </radialGradient>
+          </defs>
+          <circle cx="40" cy="40" r="36" fill="url(#sn-g)" stroke="rgba(0,212,255,0.7)" stroke-width="2"/>
+          <ellipse cx="40" cy="40" rx="36" ry="9"  fill="none" stroke="rgba(0,212,255,0.22)" stroke-width="0.8"/>
+          <ellipse cx="40" cy="40" rx="36" ry="20" fill="none" stroke="rgba(0,212,255,0.16)" stroke-width="0.8"/>
+          <ellipse cx="40" cy="40" rx="36" ry="32" fill="none" stroke="rgba(0,212,255,0.12)" stroke-width="0.8"/>
+          <line x1="40" y1="4" x2="40" y2="76" stroke="rgba(0,212,255,0.15)" stroke-width="0.8"/>
+          <ellipse cx="40" cy="40" rx="16" ry="36" fill="none" stroke="rgba(0,212,255,0.12)" stroke-width="0.8"/>
+          <text x="40" y="37" font-family="Outfit,sans-serif" font-size="8.5" font-weight="700"
+                fill="#f0f4ff" text-anchor="middle" letter-spacing="0.3">Safe</text>
+          <text x="40" y="48" font-family="Outfit,sans-serif" font-size="8.5" font-weight="700"
+                fill="#00d4ff" text-anchor="middle" letter-spacing="0.3">Net</text>
+          <circle cx="40" cy="40" r="37" fill="none" stroke="rgba(0,212,255,0.25)" stroke-width="4" opacity="0.5"/>
+        </svg>
+        <span style="color:var(--cyan)">VPC SafeNet</span>
+      </div>
+
+      <!-- CENTER: title + subtitle -->
+      <div class="legal-doc-headings">
+        <div class="legal-doc-h1">Юридическая справка</div>
+        <div class="legal-doc-h2">по корректному продвижению инфраструктуры VPC «SafeNet» на территории РФ</div>
+      </div>
+
+      <!-- RIGHT: Право и Закон image -->
+      <div class="legal-doc-side">
+        <img src="pravo-zakon.png"
+             alt="Право · Закон"
+             style="width:96px;height:auto;object-fit:contain;border-radius:14px;
+                    box-shadow:0 0 22px rgba(124,58,237,0.35);"/>
+      </div>
+
+    </div>
+
+    <!-- Body paragraph -->
+    <div class="legal-doc-body">
+      Правовая природа инфраструктуры SafeNet.<br>
+      SafeNet использует VPC (Virtual Private Cloud) — виртуальную облачную сетевую инфраструктуру, предоставляемую международными и региональными облачными провайдерами. VPC является законной технологией облачных вычислений, широко применяемой в корпоративных сетях, SaaS-сервисах, финтех-платформах, CDN и IT-инфраструктуре.
+    </div>
+
+    <!-- Key legal statement -->
+    <div class="legal-doc-main">
+      Использование VPC не запрещено<br>законодательством Российской Федерации.
+    </div>
+
+    <!-- Footer paragraph -->
+    <div class="legal-doc-footer">
+      SafeNet — это сервис на базе облачной VPC-инфраструктуры, предназначенный для повышения стабильности и качества интернет-соединения. Услуга не предназначена для нарушения требований законодательства и используется в рамках общепринятых сетевых технологий.
+    </div>
+
+  </div>
+</div>
+
+<!-- TRUST -->
+<div class="trust-wrap sr">
+  <div class="titem"><div class="tic">🏢</div>Юрлицо в ЕС (Черногория)</div>
+  <div class="titem"><div class="tic">🔐</div>No-logs политика</div>
+  <div class="titem"><div class="tic">🛡</div>Anti-DPI Technology</div>
+  <div class="titem"><div class="tic">🌍</div>EU Private Infrastructure</div>
+  <div class="titem"><div class="tic">📋</div>Официальный договор</div>
+  <div class="titem"><div class="tic">💬</div>Private Club Access</div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <a href="#" class="flogo">
+    <img src="data:image/jpeg;base64,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" alt="SafeNet">
+    VPC <em>Safe</em>Net
+  </a>
+  <div class="flegal">
+    VPC SafeNet — Internet Beyond Borders. Powered by Investeya Club.<br>
+    © 2025 SIRIUS BAR DOO · Черногория · Услуги защищённой VPC-инфраструктуры
+  </div>
+  <div class="ftg"><a href="https://t.me/VPC_SafeNet">Telegram →</a></div>
+</footer>
+
+<script>
+const SALEBOT_API_KEY  = 'e6bcd03b66976703a697b11310e714db';
+const SALEBOT_STATE_ID = 50963822;
+const SALEBOT_API_URL  = 'https://chatter.salebot.pro/api/callback';
+
+async function handleSubmit(){
+  const name  = document.getElementById('nameField').value.trim();
+  const tg    = document.getElementById('tgField').value.trim();
+  const phone = document.getElementById('phoneField').value.trim();
+  const btn   = document.getElementById('submitBtn');
+  const err   = document.getElementById('errMsg');
+  err.style.display='none';
+  if(!name){document.getElementById('nameField').focus();return}
+  if(!tg){document.getElementById('tgField').focus();return}
+  const tgClean = tg.startsWith('@')?tg.slice(1):tg;
+  btn.disabled=true;
+  btn.innerHTML='<span class="spin"></span> Подключаемся к клубу...';
+  try{
+    const res = await fetch(SALEBOT_API_URL,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({api_key:SALEBOT_API_KEY,state_id:SALEBOT_STATE_ID,client:{username:tgClean,name,...(phone&&{phone})},message:`Заявка с vpcsafenet.com | ${name} | @${tgClean}${phone?' | '+phone:''}`})
+    });
+    if(res.ok){
+      document.getElementById('formState').style.display='none';
+      document.getElementById('successState').style.display='block';
+    }else{throw new Error(res.status)}
+  }catch(e){
+    err.style.display='block';
+    btn.disabled=false;
+    btn.innerHTML='<span>🔐 Войти в клуб Инвестея</span>';
+  }
+}
+
+// ══════════════════════════════════════════════════
+// CANVAS 3D GLOBE — SafeNet
+// ══════════════════════════════════════════════════
+(function(){
+  const canvas = document.getElementById('globeCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W=480, H=480, cx=W/2, cy=H/2;
+  const R=130, FOV=420, TILT=0.35, SPEED=0.4;
+
+  // Helper: hex color to rgba string
+  function hr(hex, a){
+    const r=parseInt(hex.slice(1,3),16),
+          g=parseInt(hex.slice(3,5),16),
+          b=parseInt(hex.slice(5,7),16);
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  // Network nodes [lat, lon, color, radius]
+  const NODES=[
+    [0.8, 1.1,'#00d4ff',4],[0.5,3.8,'#0066ff',4],
+    [-0.5,2.4,'#7c3aed',3.5],[0.9,2.9,'#00ff88',3],
+    [-0.3,0.6,'#00d4ff',3],[-0.8,4.2,'#ffd700',2.5],
+    [0.2,5.5,'#00ffcc',2.5]
+  ];
+  const EDGES=[[0,1],[2,1],[0,2],[3,1],[4,2]];
+
+  // Orbital rings [rx, ry, tilt, speed, colorBase, dotColor]
+  const RINGS=[
+    [155,155,0.2,  0.8, 'rgba(0,212,255,','#00d4ff'],
+    [230,230,0.5, -0.5, 'rgba(0,102,255,','#0066ff'],
+    [310,155,1.1,  0.35,'rgba(0,255,204,','#00ffcc'],
+    [390,200,1.7, -0.22,'rgba(124,58,237,','#a78bfa']
+  ];
+
+  // Project surface point (lat/lon) → screen
+  function proj(lat,lon,yRot){
+    const x0=R*Math.cos(lat)*Math.sin(lon),
+          y0=R*Math.sin(lat),
+          z0=R*Math.cos(lat)*Math.cos(lon);
+    // Y-axis rotation
+    const x1= x0*Math.cos(yRot)+z0*Math.sin(yRot),
+          y1= y0,
+          z1=-x0*Math.sin(yRot)+z0*Math.cos(yRot);
+    // X-axis tilt
+    const x2=x1,
+          y2=y1*Math.cos(TILT)-z1*Math.sin(TILT),
+          z2=y1*Math.sin(TILT)+z1*Math.cos(TILT);
+    const sc=FOV/(FOV+z2);
+    return {sx:cx+x2*sc, sy:cy+y2*sc, z:z2, vis:z2>-R*0.9};
+  }
+
+  // Project ring point → screen
+  function projRing(rx,ry,tilt,angle){
+    const rawX=rx*Math.cos(angle),
+          rawY=ry*Math.sin(angle)*Math.cos(tilt),
+          rawZ=ry*Math.sin(angle)*Math.sin(tilt);
+    const x2=rawX,
+          y2=rawY*Math.cos(TILT)-rawZ*Math.sin(TILT),
+          z2=rawY*Math.sin(TILT)+rawZ*Math.cos(TILT);
+    const sc=FOV/(FOV+z2);
+    return {sx:cx+x2*sc, sy:cy+y2*sc, z:z2, rawZ};
+  }
+
+  function drawRing(rx,ry,tilt,speed,colorBase,dotColor,t){
+    const steps=120, off=speed*t;
+    for(let i=0;i<steps;i++){
+      const a0=(i/steps)*Math.PI*2+off,
+            a1=((i+1)/steps)*Math.PI*2+off;
+      const p0=projRing(rx,ry,tilt,a0),
+            p1=projRing(rx,ry,tilt,a1);
+      const front=(p0.rawZ+p1.rawZ)>=0;
+      ctx.beginPath();
+      ctx.moveTo(p0.sx,p0.sy);
+      ctx.lineTo(p1.sx,p1.sy);
+      ctx.strokeStyle= front ? colorBase+'0.35)' : colorBase+'0.12)';
+      ctx.lineWidth  = front ? 1.5 : 0.8;
+      ctx.stroke();
+    }
+    // Moving dot
+    const dp=projRing(rx,ry,tilt,off);
+    const front=dp.rawZ>=0, ds=front?4:2.5, da=front?1:0.4;
+    ctx.globalAlpha=da;
+    const gr=ctx.createRadialGradient(dp.sx,dp.sy,0,dp.sx,dp.sy,ds*2.5);
+    gr.addColorStop(0,hr(dotColor,0.8));
+    gr.addColorStop(1,hr(dotColor,0));
+    ctx.beginPath(); ctx.arc(dp.sx,dp.sy,ds*2.5,0,Math.PI*2);
+    ctx.fillStyle=gr; ctx.fill();
+    ctx.beginPath(); ctx.arc(dp.sx,dp.sy,ds,0,Math.PI*2);
+    ctx.fillStyle=dotColor; ctx.fill();
+    ctx.globalAlpha=1;
+  }
+
+  let t0=null;
+  function frame(ts){
+    if(!t0) t0=ts;
+    const t=(ts-t0)/1000, yRot=t*SPEED;
+    const pulse=0.5+0.5*Math.sin(t*0.6);
+    ctx.clearRect(0,0,W,H);
+
+    // 1. Ambient glow
+    const ag=ctx.createRadialGradient(cx,cy,0,cx,cy,R*1.8);
+    ag.addColorStop(0,`rgba(0,102,255,${(0.07+0.04*pulse).toFixed(3)})`);
+    ag.addColorStop(0.5,`rgba(0,212,255,${(0.03+0.02*pulse).toFixed(3)})`);
+    ag.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=ag;
+    ctx.beginPath(); ctx.arc(cx,cy,R*1.8,0,Math.PI*2); ctx.fill();
+
+    // 2. Back rings (tilt>0.9: rings 2,3 index)
+    for(let i=2;i<4;i++){
+      const [rx,ry,tl,sp,cb,dc]=RINGS[i];
+      drawRing(rx,ry,tl,sp,cb,dc,t);
+    }
+
+    // 3. Globe fill
+    const gg=ctx.createRadialGradient(cx-30,cy-30,0,cx,cy,R);
+    gg.addColorStop(0,'#0d2a4a');
+    gg.addColorStop(0.6,'#071628');
+    gg.addColorStop(1,'#02060e');
+    ctx.beginPath(); ctx.arc(cx,cy,R,0,Math.PI*2);
+    ctx.fillStyle=gg; ctx.fill();
+    ctx.strokeStyle='rgba(0,212,255,0.22)'; ctx.lineWidth=1.5; ctx.stroke();
+
+    // Atmosphere
+    ctx.beginPath(); ctx.arc(cx,cy,R+3,0,Math.PI*2);
+    ctx.strokeStyle='rgba(0,212,255,0.08)'; ctx.lineWidth=6; ctx.stroke();
+
+    // 4. Grid — latitude
+    const lats=[-Math.PI/3,-Math.PI/6,0,Math.PI/6,Math.PI/3];
+    for(const lat of lats){
+      ctx.beginPath();
+      let mv=true;
+      for(let i=0;i<=72;i++){
+        const lon=(i/72)*Math.PI*2;
+        const p=proj(lat,lon,yRot);
+        if(!p.vis){mv=true;continue;}
+        mv ? ctx.moveTo(p.sx,p.sy) : ctx.lineTo(p.sx,p.sy);
+        mv=false;
+      }
+      ctx.strokeStyle='rgba(0,212,255,0.10)'; ctx.lineWidth=0.7; ctx.stroke();
+    }
+    // Grid — longitude
+    const lons=[0,1,2,3,4,5].map(i=>i*Math.PI/3);
+    for(const lon of lons){
+      ctx.beginPath();
+      let mv=true;
+      for(let i=0;i<=48;i++){
+        const lat=(i/48)*Math.PI-Math.PI/2;
+        const p=proj(lat,lon,yRot);
+        if(!p.vis){mv=true;continue;}
+        mv ? ctx.moveTo(p.sx,p.sy) : ctx.lineTo(p.sx,p.sy);
+        mv=false;
+      }
+      ctx.strokeStyle='rgba(0,212,255,0.08)'; ctx.lineWidth=0.6; ctx.stroke();
+    }
+
+    // 5. Network edges + nodes
+    const pn=NODES.map(([lat,lon,col,r])=>({...proj(lat,lon,yRot),col,r}));
+    ctx.save();
+    for(const [a,b] of EDGES){
+      if(!pn[a].vis||!pn[b].vis) continue;
+      ctx.setLineDash([4,3]);
+      ctx.lineDashOffset=-(t*30)%7;
+      const op=(pn[a].z+pn[b].z)>0?0.3:0.1;
+      ctx.strokeStyle=`rgba(0,212,255,${op})`; ctx.lineWidth=0.8;
+      ctx.beginPath(); ctx.moveTo(pn[a].sx,pn[a].sy); ctx.lineTo(pn[b].sx,pn[b].sy); ctx.stroke();
+    }
+    ctx.setLineDash([]); ctx.restore();
+    for(const n of pn){
+      if(!n.vis) continue;
+      const gr=ctx.createRadialGradient(n.sx,n.sy,0,n.sx,n.sy,n.r*3);
+      gr.addColorStop(0,hr(n.col,0.7)); gr.addColorStop(1,hr(n.col,0));
+      ctx.beginPath(); ctx.arc(n.sx,n.sy,n.r*3,0,Math.PI*2);
+      ctx.fillStyle=gr; ctx.fill();
+      ctx.beginPath(); ctx.arc(n.sx,n.sy,n.r,0,Math.PI*2);
+      ctx.fillStyle=n.col; ctx.fill();
+    }
+
+    // 6. Front rings (tilt<=0.9: rings 0,1)
+    for(let i=0;i<2;i++){
+      const [rx,ry,tl,sp,cb,dc]=RINGS[i];
+      drawRing(rx,ry,tl,sp,cb,dc,t);
+    }
+
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  // Particles inside globe scene
+  const scene=document.getElementById('globeScene');
+  if(scene){
+    const pcols=['rgba(0,212,255,.5)','rgba(0,102,255,.45)','rgba(0,255,204,.4)','rgba(124,58,237,.45)'];
+    for(let i=0;i<14;i++){
+      const p=document.createElement('div');
+      const s=Math.random()*3+1;
+      p.style.cssText=`position:absolute;width:${s}px;height:${s}px;border-radius:50%;`+
+        `left:${Math.random()*100}%;top:${Math.random()*100}%;`+
+        `background:${pcols[Math.floor(Math.random()*pcols.length)]};`+
+        `animation:stars-drift ${Math.random()*8+6}s linear ${Math.random()*-10}s infinite;`+
+        `z-index:5;pointer-events:none;${s>2.5?'filter:blur(1px)':''}`;
+      scene.appendChild(p);
+    }
+  }
+})();
+
+const obs=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');obs.unobserve(e.target)}}),{threshold:.08});
+document.querySelectorAll('.sr').forEach(el=>obs.observe(el));
+
+// Particles
+(function(){
+  const cols=['rgba(0,212,255,.35)','rgba(0,102,255,.3)','rgba(0,255,204,.3)','rgba(124,58,237,.3)','rgba(255,215,0,.2)'];
+  for(let i=0;i<25;i++){
+    const p=document.createElement('div');
+    const s=Math.random()*3+1;
+    p.style.cssText=`position:fixed;width:${s}px;height:${s}px;border-radius:50%;left:${Math.random()*100}%;background:${cols[Math.floor(Math.random()*cols.length)]};animation:stars-drift ${Math.random()*20+15}s linear ${Math.random()*-20}s infinite;z-index:0;pointer-events:none;filter:blur(${s>2.5?1:0}px)`;
+    document.body.appendChild(p);
+  }
+})();
+</script>
+</body>
+</html>
